@@ -428,15 +428,15 @@
         }
         .chat-input {
             width: 100%;
-            padding: 10px 14px;
+            padding: 8px 14px;
             border: 2px solid white; /* Border putih */
             border-radius: 50px;
             background: #f0f0f0; /* Background abu-abu */
             outline: none;
             font-size: 15px;
             resize: none;
-            min-height: 40px;
-            max-height: 50px;
+            min-height: 36px;
+            max-height: 120px;
             overflow-y: auto;
             color: var(--text);
             transition: all 0.2s ease;
@@ -687,6 +687,9 @@
         [data-theme="dark"] .chat-input {
             background: #444;
             border-color: #666;
+            font-size: 14px;
+    min-height: 38px;
+    padding: 8px 14px;
         }
 
         @media (max-width: 992px) {
@@ -734,7 +737,9 @@
                 height: 56px;
             }
             .chat-input {
-                padding: 8px 12px;
+                padding: 7px 12px;
+                font-size: 13px;
+                min-height: 36px;
             }
             .mobile-menu-btn {
                 display: block;
