@@ -434,34 +434,54 @@
             color: #53bdeb;
         }
 
-        .reply-btn, .star-btn {
+        .message-header {
             position: absolute;
-            top: 7px;
-            background: var(--secondary);
-            border-radius: 50%;
-            border: none;
-            font-size: 16px;
-            cursor: pointer;
-            padding: 5px 7px;
+            top: -28px;
+            right: 0;
+            display: flex;
+            gap: 8px;
             opacity: 0;
-            transition: opacity 0.15s, right 0.2s;
-            color: var(--primary-dark);
-            box-shadow: var(--shadow);
+            transition: opacity 0.2s ease;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px 15px 0 0;
+            padding: 4px 10px;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
             z-index: 2;
         }
 
-        .reply-btn { 
-            right: -38px; 
-            margin-right: 5px;
+        .message:hover .message-header,
+        .message.selected .message-header {
+            opacity: 1;
         }
-        .star-btn { 
-            right: -68px; 
+
+        .reply-btn, .star-btn {
+            background: black;
+            border: none;
+            font-size: 15px;
+            cursor: pointer;
+            padding: 4px;
+            color: var(--primary-dark);
+            border-radius: 20%;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+        }
+
+        .reply-btn:hover {
+            background: var(--secondary);
+            color: var(--primary);
+        }
+
+        .star-btn {
             color: #fbc02d;
         }
 
-        .message:hover .reply-btn, .message.selected .reply-btn,
-        .message:hover .star-btn, .message.selected .star-btn {
-            opacity: 1;
+        .star-btn:hover {
+            background: #fffde7;
+            color: #ffc107;
         }
 
         .reply-preview {
@@ -907,12 +927,14 @@
                 font-size: 20px;
                 margin-right: 10px;
             }
-            .reply-btn { right: -25px; margin-right: 5px; }
-            .star-btn { right: -45px; }
-            .send-button {
-                width: 36px;
-                height: 36px;
-                font-size: 16px;
+            .message-header {
+                top: -25px;
+                padding: 3px 8px;
+            }
+            .reply-btn, .star-btn {
+                font-size: 12px;
+                width: 22px;
+                height: 22px;
             }
         }
 
@@ -936,8 +958,6 @@
             .message {
                 max-width: 100vw;
             }
-            .reply-btn { right: -20px; margin-right: 5px; }
-            .star-btn { right: -40px; }
         }
     </style>
 </head>
@@ -948,7 +968,7 @@
             <h1 class="welcome-title">DF MODS</h1>
             <p class="welcome-text">Chat dengan global random tanpa pemantauan dan tanpa pemblokiran akun</p>
             <input type="text" class="username-input" id="usernameInput" placeholder="Username?" maxlength="12">
-            <button class="start-chatting" id="startChattingBtn">Mulai Obrolan</button>
+            <button class="start-chatting" id="startChattingBtn">Bergabung</button>
         </div>
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
@@ -1019,15 +1039,15 @@
         <div class="menu-container" id="menuContainer">
             <div class="menu-item" id="clearChatButton">
                 <span class="menu-icon"><i class="fas fa-trash"></i></span>
-                <span>Clear Chat Saya</span>
+                <span>Clear Chat</span>
             </div>
             <div class="menu-item" id="logoutButton">
                 <span class="menu-icon"><i class="fas fa-sign-out-alt"></i></span>
-                <span>Keluar Dari Akun</span>
+                <span>Log Out</span>
             </div>
             <div class="menu-item" id="showStarredButton">
                 <span class="menu-icon"><i class="fas fa-star"></i></span>
-                <span>Pesan Berbintang</span>
+                <span>Chat Star</span>
             </div>
         </div>
         <div style="display:none" id="starredModal">
@@ -1439,8 +1459,8 @@
             if (messageText.length > 100) {
                 const shortText = messageText.substring(0, 100);
                 displayText = `
-                    <span class="message-text" data-full="${messageText}">${shortText}...</span>
-                    <span class="show-more-btn" onclick="window.toggleMessageExpand(this)">Baca selengkapnya</span>
+                    <span class="message-text" data-full="${messageText}">${shortText}</span>
+                    <br><span class="show-more-btn" onclick="window.toggleMessageExpand(this)">Baca selengkapnya...</span></br>
                 `;
             } else {
                 displayText = `<span class="message-text">${messageText}</span>`;
@@ -1450,6 +1470,11 @@
             const statusIcon = isCurrentUser ? getStatusIcon(message.read) : '';
             
             messageElement.innerHTML = `
+                <div class="message-header">
+                    <button class="reply-btn" title="Reply"><i class="fas fa-reply"></i></button>
+                    <button class="star-btn" title="Star">${message.starred ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>'}</button>
+                </div>
+                
                 ${replyPreview}
                 ${mediaContent}
                 <div>${displayText}</div>
@@ -1459,8 +1484,6 @@
                     <span class="message-time"><i class="fas fa-clock"></i> ${time}</span>
                     ${statusIcon}
                 </div>
-                <button class="reply-btn" title="Reply"><i class="fas fa-reply"></i></button>
-                <button class="star-btn" title="Star">${message.starred ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>'}</button>
             `;
             
             messageElement.querySelector('.reply-btn').addEventListener('click', (e) => {
@@ -1554,8 +1577,6 @@
             clearMediaPreview();
             shouldAutoScroll = true;
             scrollToBottom(true);
-            
-            showNotification('Pesan terkirim');
         }
         
         function starMessage(id, starred) {
