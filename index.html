@@ -24,7 +24,6 @@
             --online: #31a24c;
             --danger: #e53935;
         }
-
         [data-theme="gradient"] {
             --primary: #128C7E;
             --primary-dark: #075E54;
@@ -37,7 +36,6 @@
             --border: #dddfe2;
             --online: #31a24c;
         }
-
         [data-theme="dark"] {
             --primary: #128C7E;
             --primary-dark: #075E54;
@@ -50,7 +48,24 @@
             --border: #222;
             --shadow: 0 2px 8px rgba(0,0,0,0.22);
         }
-
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(7, 94, 84, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(7, 94, 84, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(7, 94, 84, 0); }
+        }
+        @keyframes ripple {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes messagePop {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
         html, body {
             width: 100vw;
             max-width: 100vw;
@@ -63,12 +78,10 @@
             transition: all 0.2s ease;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
         body {
             height: 100vh;
             overflow: hidden;
         }
-
         .welcome-container {
             position: fixed;
             top: 0;
@@ -86,7 +99,6 @@
             font-family: 'Urbanist', sans-serif;
             overflow: auto;
         }
-        
         .welcome-content {
             background-color: #1f2937;
             padding: 40px;
@@ -97,7 +109,6 @@
             max-width: 400px;
             margin: 20px auto;
         }
-
         .welcome-logo {
             width: 100px;
             height: 100px;
@@ -112,12 +123,10 @@
             justify-content: center;
             box-shadow: 0 4px 15px rgba(59,130,246,0.5);
         }
-
         .welcome-logo i {
             font-size: 45px;
             color: white;
         }
-
         .welcome-title {
             font-family: 'Orbitron', sans-serif;
             font-size: 34px;
@@ -125,14 +134,12 @@
             color: #3b82f6;
             letter-spacing: 1px;
         }
-
         .welcome-text {
             font-size: 15px;
             color: #9ca3af;
             margin-bottom: 25px;
             max-width: 400px;
         }
-
         .username-input {
             width: 100%;
             max-width: 350px;
@@ -145,7 +152,6 @@
             color: #fff;
             font-size: 16px;
         }
-
         .start-chatting {
             background: linear-gradient(90deg, var(--primary), var(--primary-dark));
             border: none;
@@ -159,12 +165,10 @@
             max-width: 350px;
             font-weight: 600;
         }
-
         .start-chatting:hover {
             background: linear-gradient(90deg, var(--primary-dark), #03433a);
             transform: scale(1.02);
         }
-
         .app-container {
             display: flex;
             height: 100vw;
@@ -174,11 +178,9 @@
             background: var(--white);
             position: relative;
         }
-
         .hidden {
             display: none !important;
         }
-
         .sidebar {
             width: 340px;
             background: var(--white);
@@ -188,7 +190,6 @@
             z-index: 10;
             transition: transform 0.3s ease;
         }
-
         .sidebar-header {
             padding: 12px 16px;
             display: flex;
@@ -200,13 +201,11 @@
             top: 0;
             z-index: 10;
         }
-
         .user-profile {
             display: flex;
             align-items: center;
             gap: 10px;
         }
-
         .avatar {
             width: 40px;
             height: 40px;
@@ -221,7 +220,6 @@
             transition: all 0.2s ease;
             font-size: 20px;
         }
-
         .avatar.online::after {
             content: '';
             width: 10px;
@@ -396,7 +394,7 @@
             margin-bottom: 8px;
             position: relative;
             word-wrap: break-word;
-            animation: fadeIn 0.3s ease;
+            animation: fadeIn 0.3s ease, messagePop 0.3s ease-out;
             line-height: 1.4;
             transition: all 0.2s ease;
             background: var(--chat-bg);
@@ -550,30 +548,32 @@
             right: 0;
             z-index: 100;
             padding: 5px 12px;
-            background: #f0f0f0;
+            background: none;
             display: flex;
             align-items: center;
-            gap: 10px;
-            border-top: 2px solid white;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.07);
+            gap: 5px;
             height: auto;
             min-height: 56px;
         }
 
         .attach-btn {
-            background: none;
+            background: #011E36;
             border: none;
-            color: var(--text-light);
-            font-size: 20px;
+            border-radius: 50px;
+            color: cyan;
+            font-size: 24px;
             cursor: pointer;
             transition: all 0.2s ease;
             padding: 5px;
+            width: 40px;
+            height: 40px;
         }
 
         .location-btn {
-            background: none;
+            background: #011E36;;
             border: none;
-            color: var(--primary);
+            border-radius: 50px;
+            color: cyan;
             font-size: 24px;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -604,23 +604,24 @@
             width: 100%;
             padding: 6px 12px;
             border: 2px solid white;
-            border-radius: 5px;
-            background: #f0f0f0;
+            border-radius: 15px;
+            background: #444;
+            border-color: #666;
             outline: none;
             font-size: 15px;
             resize: none;
             min-height: 36px;
             max-height: 70px;
             overflow-y: auto;
-            color: var(--text);
+            color: white;
             transition: all 0.2s ease;
             line-height: 1.4;
             box-sizing: border-box;
         }
 
         .send-button {
-            background: var(--primary);
-            color: var(--white);
+            background: #011E36;
+            color: cyan;
             border: none;
             border-radius: 50%;
             width: 40px;
@@ -629,17 +630,57 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             font-size: 19px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
 
         .send-button:hover {
-            background: var(--primary-dark);
+            background: #011E36;
+            transform: rotate(10deg) scale(1.1);
+        }
+
+        .send-button:active {
+            animation: pulse 0.5s;
         }
 
         .send-button:disabled {
-            background: var(--text-light);
+            background: #011E36;
             cursor: not-allowed;
+            transform: none;
+        }
+
+        .send-button .spinner {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-button .spinner::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 3px solid transparent;
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .send-button .spinner::after {
+            content: "";
+            position: absolute;
+            width: 70%;
+            height: 70%;
+            border: 3px solid transparent;
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.5s linear infinite reverse;
         }
 
         .chat-media-preview {
@@ -784,14 +825,13 @@
         }
 
         [data-theme="dark"] .chat-input-container {
-            background: #333;
-            border-top: 2px solid #555;
+            background: none;
         }
 
         [data-theme="dark"] .chat-input {
             background: #444;
             border-color: #666;
-            font-size: 14px;
+            font-size: 15px;
             min-height: 36px;
             padding: 6px 12px;
             max-height: 80px;
@@ -808,7 +848,7 @@
         }
 
         .show-more-btn {
-            color: #006400;
+            color: green;
             cursor: pointer;
             font-weight: 500;
             display: inline-block;
@@ -817,7 +857,7 @@
         }
 
         .show-more-btn:hover {
-            color: #00a86b;
+            color: green;
             text-decoration: underline;
         }
 
@@ -990,7 +1030,7 @@
             }
             .chat-input {
                 padding: 6px 12px;
-                font-size: 13px;
+                font-size: 15px;
                 min-height: 36px;
                 max-height: 80px;
             }
@@ -1055,7 +1095,6 @@
                 <button class="start-chatting" id="startChattingBtn">MASUK</button>
             </div>
         </div>
-        
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="user-profile">
@@ -1117,7 +1156,7 @@
                 <div class="chat-input-wrapper">
                     <div id="replyingBar" style="display:none"></div>
                     <div id="mediaPreview" class="chat-media-preview" style="display:none"></div>
-                    <textarea class="chat-input" id="messageInput" placeholder="Ketik Pesan.." rows="1" maxlength="200"></textarea>
+                    <textarea class="chat-input" id="messageInput" placeholder="Ketik Pesan" rows="1" maxlength="200"></textarea>
                     <div class="char-counter" id="charCounter">200</div>
                 </div>
                 <button class="send-button" id="sendButton" disabled><i class="fas fa-paper-plane"></i></button>
@@ -1663,6 +1702,9 @@
             
             if (!messageText && !mediaFile) return;
             
+            sendButton.innerHTML = '<div class="spinner"></div>';
+            sendButton.disabled = true;
+            
             const messagesRef = ref(database, 'messages');
             const newMessageRef = push(messagesRef);
             
@@ -1684,16 +1726,20 @@
             
             set(newMessageRef, data);
             
-            messageInput.value = '';
-            isTyping = false;
-            updateTypingStatusInFirebase();
-            updateSendButtonState();
-            resetTextareaHeight();
-            cancelReply();
-            clearMediaPreview();
-            shouldAutoScroll = true;
-            scrollToBottom(true);
-            updateCharCounter();
+            setTimeout(() => {
+                messageInput.value = '';
+                isTyping = false;
+                updateTypingStatusInFirebase();
+                updateSendButtonState();
+                resetTextareaHeight();
+                cancelReply();
+                clearMediaPreview();
+                shouldAutoScroll = true;
+                scrollToBottom(true);
+                updateCharCounter();
+                sendButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
+                sendButton.disabled = false;
+            }, 500);
         }
         
         function starMessage(id, starred) {
