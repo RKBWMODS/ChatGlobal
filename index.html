@@ -8,14 +8,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Urbanist:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #25d366;
-            --primary-dark: #128c7e;
+            --primary: #128C7E;
+            --primary-dark: #075E54;
             --secondary: #f0f2f5;
             --text: #050505;
             --text-light: #65676b;
             --white: #ffffff;
-            --bg: #00564F;
-            --chat-bg: black;
+            --bg: #f0f2f5;
+            --chat-bg: #e0f2e9;
             --border: #dddfe2;
             --shadow: 0 2px 8px rgba(0,0,0,0.12);
             --radius: 10px;
@@ -26,8 +26,8 @@
         }
 
         [data-theme="gradient"] {
-            --primary: #25d366;
-            --primary-dark: #128c7e;
+            --primary: #128C7E;
+            --primary-dark: #075E54;
             --secondary: linear-gradient(135deg, #f5f7fa, #e4e6eb);
             --text: #050505;
             --text-light: #65676b;
@@ -39,8 +39,8 @@
         }
 
         [data-theme="dark"] {
-            --primary: #25d366;
-            --primary-dark: #128c7e;
+            --primary: #128C7E;
+            --primary-dark: #075E54;
             --secondary: #181818;
             --text: #f5f5f5;
             --text-light: #bbbbbb;
@@ -70,7 +70,7 @@
         }
 
         .welcome-container {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
@@ -82,8 +82,9 @@
             text-align: center;
             padding: 10px;
             background: #111827;
-            z-index: 20;
+            z-index: 1000;
             font-family: 'Urbanist', sans-serif;
+            overflow: auto;
         }
         
         .welcome-content {
@@ -94,6 +95,7 @@
             text-align: center;
             width: 90%;
             max-width: 400px;
+            margin: 20px auto;
         }
 
         .welcome-logo {
@@ -145,7 +147,7 @@
         }
 
         .start-chatting {
-            background: linear-gradient(90deg, #3b82f6, #2563eb);
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
             border: none;
             color: white;
             padding: 12px 25px;
@@ -159,7 +161,7 @@
         }
 
         .start-chatting:hover {
-            background: linear-gradient(90deg, #2563eb, #1d4ed8);
+            background: linear-gradient(90deg, var(--primary-dark), #03433a);
             transform: scale(1.02);
         }
 
@@ -269,7 +271,7 @@
         }
 
         .chat-item.active {
-            background: #e7f3ff;
+            background: #e0f2e9;
         }
 
         .chat-avatar {
@@ -407,7 +409,7 @@
 
         .message.sent {
             align-self: flex-end;
-            background: black;
+            background: var(--primary-dark);
             color: white;
             border-bottom-right-radius: var(--radius);
         }
@@ -572,14 +574,20 @@
             background: none;
             border: none;
             color: var(--primary);
-            font-size: 20px;
+            font-size: 24px;
             cursor: pointer;
             transition: all 0.2s ease;
             padding: 5px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .location-btn:hover {
             color: var(--primary-dark);
+            transform: scale(1.1);
         }
 
         .attach-btn:hover {
@@ -799,21 +807,40 @@
             border-left: 3px solid #ffc107;
         }
 
+        .show-more-btn {
+            color: #006400;
+            cursor: pointer;
+            font-weight: 500;
+            display: inline-block;
+            margin-top: 5px;
+            transition: color 0.2s;
+        }
+
+        .show-more-btn:hover {
+            color: #00a86b;
+            text-decoration: underline;
+        }
+
         .location-btn-display {
             display: inline-block;
             margin-top: 5px;
-            padding: 3px 8px;
-            background: grey;
+            padding: 8px 16px;
+            background: #25d366;
             color: white;
             border-radius: 50px;
             text-decoration: none;
             font-weight: 500;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+            border: none;
         }
         
         .location-btn-display:hover {
-            background: var(--primary-dark);
+            background: #128c7e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         
         .location-container {
@@ -822,42 +849,50 @@
 
         .slim-location-btn {
             display: inline-block;
-            padding: 3px 10px;
-            background: #25d366;
+            padding: 8px 16px;
+            background: var(--primary);
             color: white;
             border-radius: 50px;
             text-decoration: none;
             font-weight: 500;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 14px;
             border: none;
             outline: none;
             margin-top: 5px;
             transition: background 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
         }
 
         .slim-location-btn:hover {
-            background: #128c7e;
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
 
         .slim-location-btn i {
             margin-right: 4px;
         }
 
-        @media (max-width: 768px) {
-            .slim-location-btn {
-                padding: 2px 8px;
-                font-size: 11px;
-            }
+        .char-counter {
+            position: absolute;
+            right: 10px;
+            bottom: 5px;
+            font-size: 12px;
+            color: #666;
+            background: rgba(255,255,255,0.7);
+            padding: 2px 6px;
+            border-radius: 10px;
+            z-index: 10;
         }
 
-        .show-more-btn {
-            color: var(--primary);
-            cursor: pointer;
-            font-weight: 500;
-            margin-left: 5px;
-            display: inline-block;
-            font-size: 13px;
+        .char-counter.warning {
+            color: #ff5722;
+        }
+
+        .char-counter.error {
+            color: #f44336;
+            font-weight: bold;
         }
 
         .message-text {
@@ -1082,7 +1117,8 @@
                 <div class="chat-input-wrapper">
                     <div id="replyingBar" style="display:none"></div>
                     <div id="mediaPreview" class="chat-media-preview" style="display:none"></div>
-                    <textarea class="chat-input" id="messageInput" placeholder="Ketik Pesan.." rows="1"></textarea>
+                    <textarea class="chat-input" id="messageInput" placeholder="Ketik Pesan.." rows="1" maxlength="200"></textarea>
+                    <div class="char-counter" id="charCounter">200</div>
                 </div>
                 <button class="send-button" id="sendButton" disabled><i class="fas fa-paper-plane"></i></button>
             </div>
@@ -1181,6 +1217,7 @@
         const notification = document.getElementById('notification');
         const notificationMessage = document.getElementById('notificationMessage');
         const notificationClose = document.getElementById('notificationClose');
+        const charCounter = document.getElementById('charCounter');
 
         let mediaFile = null;
         let mediaUrl = null;
@@ -1216,6 +1253,7 @@
                 updateSendButtonState();
                 updateTypingStatus();
                 autoResizeTextarea();
+                updateCharCounter();
             });
             
             menuButton.addEventListener('click', (e) => {
@@ -1265,6 +1303,22 @@
                 }
             });
             resizeObserver.observe(chatContent);
+        }
+
+        function updateCharCounter() {
+            const maxLength = 200;
+            const currentLength = messageInput.value.length;
+            const remaining = maxLength - currentLength;
+            
+            charCounter.textContent = remaining;
+            
+            if (remaining <= 10) {
+                charCounter.className = 'char-counter error';
+            } else if (remaining <= 30) {
+                charCounter.className = 'char-counter warning';
+            } else {
+                charCounter.className = 'char-counter';
+            }
         }
 
         function showNotification(message) {
@@ -1349,6 +1403,7 @@
             userAvatar.style.backgroundColor = currentUser.color;
             
             chatInputContainer.classList.remove('hidden');
+            updateCharCounter();
             
             setupFirebase();
             setTimeout(() => { messageInput.focus(); }, 300);
@@ -1492,7 +1547,6 @@
             let locationContent = '';
             let displayText = escapeHTML(message.text);
             
-            // Check for location sharing messages
             if (message.text) {
                 let url = null;
                 if (message.text.includes('Saya membagikan lokasi:')) {
@@ -1601,6 +1655,12 @@
         
         function sendMessage() {
             const messageText = messageInput.value.trim();
+            
+            if (messageText.length > 200) {
+                showNotification("Pesan tidak boleh lebih dari 200 karakter!");
+                return;
+            }
+            
             if (!messageText && !mediaFile) return;
             
             const messagesRef = ref(database, 'messages');
@@ -1633,6 +1693,7 @@
             clearMediaPreview();
             shouldAutoScroll = true;
             scrollToBottom(true);
+            updateCharCounter();
         }
         
         function starMessage(id, starred) {
