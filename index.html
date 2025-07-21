@@ -82,19 +82,16 @@
             height: 100vh;
             overflow: hidden;
         }
-        
         .input-group {
             width: 100%;
             max-width: 350px;
             margin: 0 auto;
         }
-        
         .username-input, .start-chatting {
             box-sizing: border-box;
             width: 100%;
             display: block;
         }
-        
         .username-input {
             padding: 12px;
             margin-bottom: 20px;
@@ -105,7 +102,6 @@
             color: #fff;
             font-size: 16px;
         }
-        
         .start-chatting {
             background: linear-gradient(90deg, var(--primary), var(--primary-dark));
             border: none;
@@ -118,12 +114,10 @@
             font-weight: 600;
             text-align: center;
         }
-        
         .start-chatting:hover {
             background: linear-gradient(90deg, var(--primary-dark), #03433a);
             transform: scale(1.02);
         }
-        
         .welcome-container {
             position: fixed;
             top: 0;
@@ -244,28 +238,23 @@
             bottom: 0;
             right: 0;
         }
-
         .user-info {
             display: flex;
             flex-direction: column;
         }
-
         .username {
             font-weight: 600;
             font-size: 15px;
         }
-
         .user-status {
             font-size: 12px;
             color: var(--text-light);
         }
-
         .chat-list {
             flex: 1;
             overflow-y: auto;
             background: var(--white);
         }
-
         .chat-item {
             display: flex;
             padding: 12px 16px;
@@ -276,19 +265,15 @@
             align-items: center;
             gap: 12px;
         }
-
         .chat-item:hover {
             background: var(--secondary);
         }
-
         .chat-item.active {
             background: #e0f2e9;
         }
-
         .chat-avatar {
             position: relative;
         }
-
         .chat-info {
             flex: 1;
             display: flex;
@@ -296,7 +281,6 @@
             min-width: 0;
             justify-content: center;
         }
-
         .chat-name {
             font-weight: 600;
             font-size: 17px;
@@ -304,7 +288,6 @@
             display: flex;
             justify-content: space-between;
         }
-
         .chat-preview {
             font-size: 13px;
             color: var(--text-light);
@@ -313,12 +296,10 @@
             text-overflow: ellipsis;
             display: flex;
         }
-
         .chat-time {
             font-size: 12px;
             color: var(--text-light);
         }
-
         .chat-container {
             flex: 1;
             display: flex;
@@ -331,7 +312,6 @@
             box-sizing: border-box;
             padding-bottom: 64px;
         }
-
         .chat-header {
             padding: 12px 16px;
             display: flex;
@@ -342,17 +322,14 @@
             top: 0;
             z-index: 10;
         }
-
         .chat-title {
             flex: 1;
             margin-left: 12px;
         }
-
         .chat-name-lg {
             font-weight: 600;
             font-size: 16px;
         }
-
         .chat-status {
             font-size: 13px;
             color: var(--text-light);
@@ -1336,6 +1313,16 @@
             color: #F44336;
         }
 
+        @media (min-width: 769px) {
+            .chat-input-container {
+                max-width: 680px; /* input chat desktop */
+                margin: 0 auto; /* Center the input container */
+                left: unset;
+                right: unset;
+                width: 100%;
+            }
+        }
+
         @media (max-width: 992px) {
             .sidebar { width: 270px;}
         }
@@ -2285,9 +2272,7 @@
                 data.media = mediaUrl;
                 data.mediaType = mediaFile.type;
             }
-            
             set(newMessageRef, data);
-            
             setTimeout(() => {
                 messageInput.value = '';
                 isTyping = false;
@@ -2303,12 +2288,10 @@
                 sendButton.disabled = false;
             }, 500);
         }
-        
         function starMessage(id, starred) {
             const msgRef = ref(database, 'messages/' + id + '/starred');
             set(msgRef, starred);
         }
-        
         window.scrollToReply = function(messageId) {
             const el = chatContent.querySelector(`[data-message-id='${messageId}']`);
             if (el) {
@@ -2317,27 +2300,22 @@
                 setTimeout(()=>{el.style.background="";}, 900);
             }
         }
-        
         function escapeHTML(str) {
             return (str+"").replace(/[<>&"]/g,function(c){
                 return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];
             });
         }
-        
         function formatTime(timestamp) {
             if (!timestamp) return 'Baru';
             const date = new Date(timestamp);
             if (isNaN(date.getTime())) return 'Baru saja';
-            
             const now = new Date();
             const diffInMinutes = Math.floor((now - date) / (1000 * 60));
-            
             if (diffInMinutes < 1) return 'Baru saja';
             if (diffInMinutes < 60) return `${diffInMinutes} Min`;
             if (diffInMinutes < 24 * 60) return `${Math.floor(diffInMinutes / 60)} Jam`;
             return date.toLocaleDateString('id-ID', { month: 'short', day: 'numeric' });
         }
-        
         function getStatusIcon(read) {
             if (read) {
                 return '<span class="message-status read"><i class="fas fa-check-double"></i></span>';
@@ -2345,7 +2323,6 @@
                 return '<span class="message-status"><i class="fas fa-check-double"></i></span>';
             }
         }
-        
         function updateLastMessageTime(messages) {
             if (!messages) return;
             let lastMessage = null;
@@ -2353,7 +2330,6 @@
                 if (!lastMessage || (msg.timestamp || 0) > (lastMessage.timestamp || 0)) lastMessage = msg;
             });
             if (!lastMessage) return;
-            
             lastMessageTime.textContent = formatTime(lastMessage.timestamp);
             const chatPreview = document.querySelector('.chat-item.active .chat-preview');
             if (chatPreview && lastMessage.text) {
@@ -2363,12 +2339,10 @@
                 chatPreview.textContent = previewText;
             }
         }
-        
         function updateTypingStatus() {
             if (!currentUser) return;
             const now = Date.now();
             const typingTimeout = 2000;
-            
             if (messageInput.value.length > 0) {
                 isTyping = true;
                 lastTypingTime = now;
@@ -2377,7 +2351,6 @@
                 isTyping = false;
                 updateTypingStatusInFirebase();
             }
-            
             setTimeout(() => {
                 if (now - lastTypingTime >= typingTimeout && isTyping) {
                     isTyping = false;
@@ -2385,11 +2358,9 @@
                 }
             }, typingTimeout);
         }
-        
         function updateTypingStatusInFirebase() {
             if (!currentUser) return;
             const typingRef = ref(database, `typing/${userId}`);
-            
             if (isTyping) {
                 set(typingRef, {
                     isTyping: true,
@@ -2404,51 +2375,42 @@
                 });
             }
         }
-        
         function markMessagesAsRead() {
             if (!lastMessageId) return;
             const messagesRef = ref(database, 'messages');
             get(messagesRef).then((snapshot) => {
                 const messages = snapshot.val();
                 if (!messages) return;
-                
                 const updates = {};
                 Object.entries(messages).forEach(([id, message]) => {
                     if (message.userId !== userId && !message.read) {
                         updates[`${id}/read`] = true;
                     }
                 });
-                
                 if (Object.keys(updates).length > 0) {
                     update(messagesRef, updates);
                 }
             });
         }
-        
         function handleVisibilityChange() {
             if (document.visibilityState === 'visible') {
                 document.title = 'DF MODS';
                 markMessagesAsRead();
             }
         }
-        
         function handleWindowFocus() {
             markMessagesAsRead();
         }
-        
         function autoResizeTextarea() {
             messageInput.style.height = 'auto';
             messageInput.style.height = (messageInput.scrollHeight) + 'px';
         }
-        
         function resetTextareaHeight() {
             messageInput.style.height = 'auto';
         }
-        
         function updateSendButtonState() {
             sendButton.disabled = messageInput.value.trim() === '' && !mediaFile;
         }
-        
         function scrollToBottom(force = false) {
             if (force || shouldAutoScroll) {
                 setTimeout(() => {
@@ -2459,25 +2421,20 @@
                 }, 100);
             }
         }
-        
         function handleChatScroll() {
             const threshold = 100;
             const position = chatContent.scrollTop + chatContent.clientHeight;
             const isNearBottom = position > chatContent.scrollHeight - threshold;
-            
             shouldAutoScroll = isNearBottom;
             if (!isNearBottom && chatContent.scrollTop < lastScrollPosition) {
                 shouldAutoScroll = false;
             }
-            
             lastScrollPosition = chatContent.scrollTop;
         }
-        
         function openFileAttachment() {
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = "image/*,.pdf,.doc,.docx,.ppt,.pptx,.zip,.rar,.txt";
-            
             input.onchange = function(e) {
                 const file = e.target.files[0];
                 if (!file) return;
@@ -2485,46 +2442,37 @@
                     alert("Video & Audio Dilarang!");
                     return;
                 }
-                
                 if (file.size > 5 * 1024 * 1024) {
                     alert("Hanya Boleh 5 MB");
                     return;
                 }
-                
                 showMediaPreview(file);
             };
             input.click();
         }
-        
         function showMediaPreview(file) {
             mediaFile = file;
             const reader = new FileReader();
-            
             reader.onload = function(e) {
                 mediaUrl = e.target.result;
                 let preview = '';
-                
                 if (file.type.startsWith("image/")) {
                     preview = `<img src="${mediaUrl}" style="max-width:80px;max-height:80px;border-radius:8px;" alt="preview"/>`;
                 } else {
                     preview = `<span style="color:#25d366;font-size:14px;"><i class="fas fa-file"></i> ${file.name}</span>`;
                 }
-                
                 preview += `<button class="remove-media" id="removeMediaBtn" title="Remove"><i class="fas fa-times"></i></button>`;
                 mediaPreview.innerHTML = preview;
                 mediaPreview.style.display = "flex";
-                
                 const restrictionInfo = document.createElement('div');
                 restrictionInfo.className = 'restriction-info';
                 restrictionInfo.innerHTML = '<i class="fas fa-info-circle"></i> Video & Audio Dilarang!';
                 mediaPreview.appendChild(restrictionInfo);
-                
                 document.getElementById("removeMediaBtn").onclick = clearMediaPreview;
                 updateSendButtonState();
             };
             reader.readAsDataURL(file);
         }
-        
         function clearMediaPreview() {
             mediaFile = null;
             mediaUrl = null;
@@ -2532,13 +2480,11 @@
             mediaPreview.style.display = "none";
             updateSendButtonState();
         }
-        
         function clearMyChat() {
             const messagesRef = ref(database, 'messages');
             get(messagesRef).then((snapshot) => {
                 const messages = snapshot.val();
                 if (!messages) return;
-                
                 Object.entries(messages).forEach(([id, message]) => {
                     if (message.userId === userId) {
                         remove(ref(database, 'messages/' + id));
@@ -2547,16 +2493,13 @@
                 alert('Berhasil Menghapus Pesan');
             });
         }
-        
         function showStarredModal() {
             starredModal.style.display = '';
             starredList.innerHTML = '';
-            
             if (!starredMessages.length) {
                 starredList.innerHTML = '<div style="color:#888;font-size:14px;"><i class="far fa-star"></i> Tidak memiliki pesan</div>';
                 return;
             }
-            
             starredMessages.forEach(msg => {
                 let div = document.createElement('div');
                 div.style.marginBottom = "12px";
@@ -2567,22 +2510,18 @@
                 starredList.appendChild(div);
             });
         }
-        
         function closeStarredModalFunc() {
             starredModal.style.display = 'none';
         }
-        
         function openCamera() {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 showNotification("Browser tidak mendukung kamera");
                 return;
             }
-            
             if (cameraActive) {
                 closeCamera();
                 return;
             }
-            
             navigator.mediaDevices.getUserMedia({ video: true, audio: false })
                 .then(stream => {
                     cameraStream = stream;
@@ -2596,7 +2535,6 @@
                     showNotification("Tidak dapat mengakses kamera: " + error.message);
                 });
         }
-        
         function closeCamera() {
             if (cameraStream) {
                 cameraStream.getTracks().forEach(track => track.stop());
@@ -2606,19 +2544,16 @@
             cameraActive = false;
             cameraButton.innerHTML = '<i class="fas fa-camera"></i>';
         }
-        
         function startCall(type) {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 showNotification("Browser tidak mendukung panggilan");
                 return;
             }
-            
             callType = type;
             callActive = true;
             callModal.classList.add('active');
             callTitle.textContent = type === 'video' ? 'Panggilan Video' : 'Panggilan Suara';
             callStatus.textContent = 'Mempersiapkan...';
-            
             navigator.mediaDevices.enumerateDevices()
                 .then(devices => {
                     videoDevices = devices.filter(device => device.kind === 'videoinput');
@@ -2629,18 +2564,15 @@
                 })
                 .then(stream => {
                     localStream = stream;
-                    
                     if (type === 'video') {
                         localVideo.srcObject = stream;
                         localVideoPlaceholder.style.display = 'none';
                     } else {
                         localVideoPlaceholder.style.display = 'flex';
                     }
-                    
                     callStartTime = new Date();
                     callTimerInterval = setInterval(updateCallTimer, 1000);
                     callStatus.textContent = 'Memanggil...';
-                    
                     setTimeout(() => {
                         simulateCallAnswered();
                     }, 5000);
@@ -2651,40 +2583,33 @@
                     endCall();
                 });
         }
-        
         function simulateCallAnswered() {
             callStatus.textContent = 'Terhubung';
             answerCallButton.style.display = 'none';
             remoteVideoPlaceholder.style.display = 'flex';
         }
-        
         function answerCall() {
             callStatus.textContent = 'Terhubung';
             answerCallButton.style.display = 'none';
         }
-        
         function endCall() {
             if (callTimerInterval) {
                 clearInterval(callTimerInterval);
                 callTimerInterval = null;
             }
-            
             if (localStream) {
                 localStream.getTracks().forEach(track => track.stop());
                 localStream = null;
             }
-            
             if (remoteStream) {
                 remoteStream.getTracks().forEach(track => track.stop());
                 remoteStream = null;
             }
-            
             callModal.classList.remove('active');
             minimizedCall.style.display = 'none';
             callActive = false;
             callType = null;
             callMinimized = false;
-            
             localVideo.srcObject = null;
             remoteVideo.srcObject = null;
             minimizedRemoteVideo.srcObject = null;
@@ -2694,7 +2619,6 @@
             callTimer.textContent = '00:00';
             currentZoom = 1;
         }
-        
         function updateCallTimer() {
             const now = new Date();
             const diff = Math.floor((now - callStartTime) / 1000);
@@ -2702,10 +2626,8 @@
             const seconds = (diff % 60).toString().padStart(2, '0');
             callTimer.textContent = `${minutes}:${seconds}`;
         }
-        
         function toggleVideo() {
             if (!localStream) return;
-            
             const videoTrack = localStream.getVideoTracks()[0];
             if (videoTrack) {
                 videoEnabled = !videoEnabled;
@@ -2714,10 +2636,8 @@
                 toggleVideoButton.style.backgroundColor = videoEnabled ? '#333' : '#e53935';
             }
         }
-        
         function toggleAudio() {
             if (!localStream) return;
-            
             const audioTrack = localStream.getAudioTracks()[0];
             if (audioTrack) {
                 audioEnabled = !audioEnabled;
@@ -2726,13 +2646,10 @@
                 toggleAudioButton.style.backgroundColor = audioEnabled ? '#333' : '#e53935';
             }
         }
-        
         function switchCamera() {
             if (!localStream || videoDevices.length < 2) return;
-            
             currentDeviceIndex = (currentDeviceIndex + 1) % videoDevices.length;
             const deviceId = videoDevices[currentDeviceIndex].deviceId;
-            
             navigator.mediaDevices.getUserMedia({
                 video: { deviceId: { exact: deviceId } },
                 audio: true
@@ -2746,39 +2663,31 @@
                 console.error("Error switching camera:", error);
             });
         }
-        
         function minimizeCall() {
             callModal.classList.remove('active');
             minimizedCall.style.display = 'flex';
             callMinimized = true;
-            
             if (remoteVideo.srcObject) {
                 minimizedRemoteVideo.srcObject = remoteVideo.srcObject;
             }
         }
-        
         function maximizeCall() {
             minimizedCall.style.display = 'none';
             callModal.classList.add('active');
             callMinimized = false;
-            
             if (minimizedRemoteVideo.srcObject) {
                 remoteVideo.srcObject = minimizedRemoteVideo.srcObject;
             }
         }
-        
         function adjustZoom(delta) {
             currentZoom = Math.max(1, Math.min(3, currentZoom + delta));
             localVideo.style.transform = `scale(${currentZoom})`;
             remoteVideo.style.transform = `scale(${currentZoom})`;
         }
-        
         function updateNetworkQuality() {
             if (!callActive) return;
-            
             const quality = Math.random();
             let status, className;
-            
             if (quality > 0.7) {
                 status = 'Baik';
                 className = 'good';
@@ -2789,11 +2698,9 @@
                 status = 'Buruk';
                 className = 'poor';
             }
-            
             networkIndicator.innerHTML = `<i class="fas fa-signal"></i> ${status}`;
             networkIndicator.className = `network-indicator ${className}`;
         }
-        
         initApp();
     </script>
 </body>
