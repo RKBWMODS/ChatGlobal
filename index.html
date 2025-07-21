@@ -1313,18 +1313,50 @@
             color: #F44336;
         }
 
+        /* Perbaikan responsivitas untuk desktop/laptop */
         @media (min-width: 769px) {
             .chat-input-container {
-                max-width: 769px; /* untuk desktop masih kurang panjang kurang responsif walawpun bagian panjang kirinya sudah pas tinggal sesuaikan panjang ke kanan contohnya button kirim pesanya itu sejajar sama button hamburger di pojok kanan atas dan button kirimnya di pojok kiri bawah gitu lah intinya berlaku buat laptop dan desktop*/
-                margin: 0 auto; /* Center the input container */
-                left: unset;
-                right: unset;
-                width: 100%;
+                position: fixed;
+                bottom: 0;
+                left: 340px; /* Mulai dari setelah sidebar */
+                right: 0;
+                max-width: calc(100vw - 340px); /* Lebar maksimal dikurangi sidebar */
+                margin: 0;
+                padding: 8px 16px;
+                background: none;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                height: auto;
+                min-height: 64px;
+                box-sizing: border-box;
+            }
+            
+            .chat-input-wrapper {
+                flex: 1;
+                position: relative;
+                margin-right: 8px;
+                max-width: calc(100% - 200px); /* Sisakan ruang untuk tombol-tombol */
+            }
+            
+            .send-button {
+                margin-right: 16px; /* Jarak dari tepi kanan agar sejajar dengan hamburger */
+            }
+            
+            .chat-container {
+                padding-bottom: 80px; /* Tambah ruang untuk input yang lebih tinggi */
             }
         }
 
         @media (max-width: 992px) {
             .sidebar { width: 270px;}
+            
+            @media (min-width: 769px) {
+                .chat-input-container {
+                    left: 270px;
+                    max-width: calc(100vw - 270px);
+                }
+            }
         }
 
         @media (max-width: 768px) {
@@ -1368,6 +1400,10 @@
                 max-width: 95%;
             }
             .chat-input-container {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
                 padding: 8px;
                 height: auto;
                 min-height: 56px;
