@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -1299,6 +1300,7 @@
             border-radius: 10px;
             font-size: 12px;
             z-index: 10;
+            font-family: monospace;
         }
         
         .network-indicator.good {
@@ -1313,14 +1315,13 @@
             color: #F44336;
         }
 
-        /* Perbaikan responsivitas untuk desktop/laptop */
         @media (min-width: 769px) {
             .chat-input-container {
                 position: fixed;
                 bottom: 0;
-                left: 340px; /* Mulai dari setelah sidebar */
+                left: 340px;
                 right: 0;
-                max-width: calc(100vw - 340px); /* Lebar maksimal dikurangi sidebar */
+                max-width: calc(100vw - 340px);
                 margin: 0;
                 padding: 8px 16px;
                 background: none;
@@ -1336,15 +1337,15 @@
                 flex: 1;
                 position: relative;
                 margin-right: 8px;
-                max-width: calc(100% - 200px); /* Sisakan ruang untuk tombol-tombol */
+                max-width: calc(100% - 200px);
             }
             
             .send-button {
-                margin-right: 16px; /* Jarak dari tepi kanan agar sejajar dengan hamburger */
+                margin-right: 16px;
             }
             
             .chat-container {
-                padding-bottom: 80px; /* Tambah ruang untuk input yang lebih tinggi */
+                padding-bottom: 80px;
             }
         }
 
@@ -1705,1039 +1706,1163 @@
         </div>
     </div>
     <script type="module">
-        document.documentElement.setAttribute('data-theme', 'dark');
+    document.documentElement.setAttribute('data-theme', 'dark');
+    
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getDatabase, ref, push, onValue, set, onDisconnect, serverTimestamp, get, update, off, remove, query, limitToLast } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAJ-cWGO4ViU4w1BE7CMGKD464aqHxMNZQ",
+        authDomain: "chatglobal-1e541.firebaseapp.com",
+        databaseURL: "https://chatglobal-1e541-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "chatglobal-1e541",
+        storageBucket: "chatglobal-1e541.firebasestorage.app",
+        messagingSenderId: "72603231700",
+        appId: "1:72603231700:web:1dcdd87b8ebffb4f7a6241",
+        measurementId: "G-NGXHEVQD6Z"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    let peerConnection = null;
+    let localStream = null;
+    let remoteStream = null;
+    const servers = {
+        iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' }
+        ]
+    };
+
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const usernameInput = document.getElementById('usernameInput');
+    const startChattingBtn = document.getElementById('startChattingBtn');
+    const sidebar = document.getElementById('sidebar');
+    const chatContainer = document.getElementById('chatContainer');
+    const chatContent = document.getElementById('chatContent');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const userAvatar = document.getElementById('userAvatar');
+    const currentUsername = document.getElementById('currentUsername');
+    const userStatus = document.getElementById('userStatus');
+    const onlineUsersCount = document.getElementById('onlineUsersCount');
+    const typingIndicator = document.getElementById('typingIndicator');
+    const typingText = document.getElementById('typingText');
+    const lastMessageTime = document.getElementById('lastMessageTime');
+    const globalChatItem = document.getElementById('globalChatItem');
+    const menuButton = document.getElementById('menuButton');
+    const menuContainer = document.getElementById('menuContainer');
+    const clearChatButton = document.getElementById('clearChatButton');
+    const logoutButton = document.getElementById('logoutButton');
+    const attachButton = document.getElementById('attachButton');
+    const locationButton = document.getElementById('locationButton');
+    const replyingBar = document.getElementById('replyingBar');
+    const showStarredButton = document.getElementById('showStarredButton');
+    const starredModal = document.getElementById('starredModal');
+    const starredList = document.getElementById('starredList');
+    const closeStarredModal = document.getElementById('closeStarredModal');
+    const chatInputContainer = document.getElementById('chatInputContainer');
+    const mediaPreview = document.getElementById('mediaPreview');
+    const notification = document.getElementById('notification');
+    const notificationMessage = document.getElementById('notificationMessage');
+    const notificationClose = document.getElementById('notificationClose');
+    const charCounter = document.getElementById('charCounter');
+    const cameraButton = document.getElementById('cameraButton');
+    const voiceCallButton = document.getElementById('voiceCallButton');
+    const videoCallButton = document.getElementById('videoCallButton');
+    const themeToggleMenuItem = document.getElementById('themeToggleMenuItem');
+    const callModal = document.getElementById('callModal');
+    const callTitle = document.getElementById('callTitle');
+    const callStatus = document.getElementById('callStatus');
+    const callTimer = document.getElementById('callTimer');
+    const localVideo = document.getElementById('localVideo');
+    const remoteVideo = document.getElementById('remoteVideo');
+    const localVideoPlaceholder = document.getElementById('localVideoPlaceholder');
+    const remoteVideoPlaceholder = document.getElementById('remoteVideoPlaceholder');
+    const answerCallButton = document.getElementById('answerCallButton');
+    const endCallButton = document.getElementById('endCallButton');
+    const toggleVideoButton = document.getElementById('toggleVideoButton');
+    const toggleAudioButton = document.getElementById('toggleAudioButton');
+    const switchCameraButton = document.getElementById('switchCameraButton');
+    const minimizeButton = document.getElementById('minimizeButton');
+    const zoomInButton = document.getElementById('zoomInButton');
+    const zoomOutButton = document.getElementById('zoomOutButton');
+    const networkIndicator = document.getElementById('networkIndicator');
+    const cameraPreview = document.getElementById('cameraPreview');
+    const cameraPreviewVideo = document.getElementById('cameraPreviewVideo');
+    const closeCameraPreview = document.getElementById('closeCameraPreview');
+    const minimizedCall = document.getElementById('minimizedCall');
+    const minimizedRemoteVideo = document.getElementById('minimizedRemoteVideo');
+    const maximizeButton = document.getElementById('maximizeButton');
+    const endCallButtonMinimized = document.getElementById('endCallButtonMinimized');
+
+    let mediaFile = null;
+    let mediaUrl = null;
+    let currentUser = null;
+    let userId = null;
+    let isTyping = false;
+    let lastTypingTime = 0;
+    let usersTyping = {};
+    let onlineUsers = {};
+    let lastMessageId = null;
+    let messageListeners = [];
+    let isScrolledUp = false;
+    let lastScrollPosition = 0;
+    let replyToMessage = null;
+    let selectedMessages = [];
+    let starredMessages = [];
+    let shouldAutoScroll = true;
+    let resizeObserver = null;
+    let lastMessageTimestamp = 0;
+    let firstLoad = true;
+    let callActive = false;
+    let callType = null;
+    let callTimerInterval = null;
+    let callStartTime = null;
+    let videoEnabled = true;
+    let audioEnabled = true;
+    let cameraActive = false;
+    let cameraStream = null;
+    let currentZoom = 1;
+    let videoDevices = [];
+    let currentDeviceIndex = 0;
+    let callMinimized = false;
+
+    async function getRealNetworkStats() {
+        if (!peerConnection) return null;
         
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, set, onDisconnect, serverTimestamp, get, update, off, remove, query, limitToLast } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+        try {
+            const stats = await peerConnection.getStats();
+            let inbound = null;
+            
+            stats.forEach(report => {
+                if (report.type === 'inbound-rtp' && report.mediaType === 'video') {
+                    inbound = report;
+                }
+            });
+            
+            if (!inbound) return null;
+            
+            const packetsLost = inbound.packetsLost || 0;
+            const packetsReceived = inbound.packetsReceived || 1;
+            const lossPercentage = (packetsLost / (packetsReceived + packetsLost)) * 100;
+            
+            if (lossPercentage < 1) return { quality: 'good', level: 4 };
+            else if (lossPercentage < 5) return { quality: 'average', level: 3 };
+            else return { quality: 'poor', level: 1 };
+            
+        } catch (e) {
+            console.error("Gagal ambil stats:", e);
+            return null;
+        }
+    }
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAJ-cWGO4ViU4w1BE7CMGKD464aqHxMNZQ",
-            authDomain: "chatglobal-1e541.firebaseapp.com",
-            databaseURL: "https://chatglobal-1e541-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "chatglobal-1e541",
-            storageBucket: "chatglobal-1e541.firebasestorage.app",
-            messagingSenderId: "72603231700",
-            appId: "1:72603231700:web:1dcdd87b8ebffb4f7a6241",
-            measurementId: "G-NGXHEVQD6Z"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-
-        const welcomeScreen = document.getElementById('welcomeScreen');
-        const usernameInput = document.getElementById('usernameInput');
-        const startChattingBtn = document.getElementById('startChattingBtn');
-        const sidebar = document.getElementById('sidebar');
-        const chatContainer = document.getElementById('chatContainer');
-        const chatContent = document.getElementById('chatContent');
-        const messageInput = document.getElementById('messageInput');
-        const sendButton = document.getElementById('sendButton');
-        const userAvatar = document.getElementById('userAvatar');
-        const currentUsername = document.getElementById('currentUsername');
-        const userStatus = document.getElementById('userStatus');
-        const onlineUsersCount = document.getElementById('onlineUsersCount');
-        const typingIndicator = document.getElementById('typingIndicator');
-        const typingText = document.getElementById('typingText');
-        const lastMessageTime = document.getElementById('lastMessageTime');
-        const globalChatItem = document.getElementById('globalChatItem');
-        const menuButton = document.getElementById('menuButton');
-        const menuContainer = document.getElementById('menuContainer');
-        const clearChatButton = document.getElementById('clearChatButton');
-        const logoutButton = document.getElementById('logoutButton');
-        const attachButton = document.getElementById('attachButton');
-        const locationButton = document.getElementById('locationButton');
-        const replyingBar = document.getElementById('replyingBar');
-        const showStarredButton = document.getElementById('showStarredButton');
-        const starredModal = document.getElementById('starredModal');
-        const starredList = document.getElementById('starredList');
-        const closeStarredModal = document.getElementById('closeStarredModal');
-        const chatInputContainer = document.getElementById('chatInputContainer');
-        const mediaPreview = document.getElementById('mediaPreview');
-        const notification = document.getElementById('notification');
-        const notificationMessage = document.getElementById('notificationMessage');
-        const notificationClose = document.getElementById('notificationClose');
-        const charCounter = document.getElementById('charCounter');
-        const cameraButton = document.getElementById('cameraButton');
-        const voiceCallButton = document.getElementById('voiceCallButton');
-        const videoCallButton = document.getElementById('videoCallButton');
-        const themeToggleMenuItem = document.getElementById('themeToggleMenuItem');
-
-        const callModal = document.getElementById('callModal');
-        const callTitle = document.getElementById('callTitle');
-        const callStatus = document.getElementById('callStatus');
-        const callTimer = document.getElementById('callTimer');
-        const localVideo = document.getElementById('localVideo');
-        const remoteVideo = document.getElementById('remoteVideo');
-        const localVideoPlaceholder = document.getElementById('localVideoPlaceholder');
-        const remoteVideoPlaceholder = document.getElementById('remoteVideoPlaceholder');
-        const answerCallButton = document.getElementById('answerCallButton');
-        const endCallButton = document.getElementById('endCallButton');
-        const toggleVideoButton = document.getElementById('toggleVideoButton');
-        const toggleAudioButton = document.getElementById('toggleAudioButton');
-        const switchCameraButton = document.getElementById('switchCameraButton');
-        const minimizeButton = document.getElementById('minimizeButton');
-        const zoomInButton = document.getElementById('zoomInButton');
-        const zoomOutButton = document.getElementById('zoomOutButton');
-        const networkIndicator = document.getElementById('networkIndicator');
-        const cameraPreview = document.getElementById('cameraPreview');
-        const cameraPreviewVideo = document.getElementById('cameraPreviewVideo');
-        const closeCameraPreview = document.getElementById('closeCameraPreview');
-        const minimizedCall = document.getElementById('minimizedCall');
-        const minimizedRemoteVideo = document.getElementById('minimizedRemoteVideo');
-        const maximizeButton = document.getElementById('maximizeButton');
-        const endCallButtonMinimized = document.getElementById('endCallButtonMinimized');
-
-        let mediaFile = null;
-        let mediaUrl = null;
-        let currentUser = null;
-        let userId = null;
-        let isTyping = false;
-        let lastTypingTime = 0;
-        let usersTyping = {};
-        let onlineUsers = {};
-        let lastMessageId = null;
-        let messageListeners = [];
-        let isScrolledUp = false;
-        let lastScrollPosition = 0;
-        let replyToMessage = null;
-        let selectedMessages = [];
-        let starredMessages = [];
-        let shouldAutoScroll = true;
-        let resizeObserver = null;
-        let lastMessageTimestamp = 0;
-        let firstLoad = true;
+    async function updateNetworkQuality() {
+        if (!callActive || !peerConnection) return;
         
-        let localStream = null;
-        let remoteStream = null;
-        let callActive = false;
-        let callType = null;
-        let callTimerInterval = null;
-        let callStartTime = null;
-        let videoEnabled = true;
-        let audioEnabled = true;
-        let cameraActive = false;
-        let cameraStream = null;
-        let currentZoom = 1;
-        let videoDevices = [];
-        let currentDeviceIndex = 0;
-        let callMinimized = false;
-
-        function initApp() {
-            const savedUsername = localStorage.getItem('globalChatUsername');
-            if (savedUsername) {
-                usernameInput.value = savedUsername;
-            }
-            
-            startChattingBtn.addEventListener('click', startChatting);
-            sendButton.addEventListener('click', sendMessage);
-            locationButton.addEventListener('click', shareLocation);
-            
-            messageInput.addEventListener('input', () => {
-                updateSendButtonState();
-                updateTypingStatus();
-                autoResizeTextarea();
-                updateCharCounter();
-            });
-            
-            menuButton.addEventListener('click', (e) => {
-                e.stopPropagation();
-                menuContainer.classList.toggle('active');
-            });
-            
-            document.addEventListener('click', () => {
-                menuContainer.classList.remove('active');
-            });
-            
-            clearChatButton.addEventListener('click', () => {
-                if (confirm('Apakah kamu ingin menghapus chat?')) {
-                    clearMyChat();
-                    menuContainer.classList.remove('active');
-                }
-            });
-            
-            logoutButton.addEventListener('click', () => {
-                if (confirm('Apakah kamu mau keluar dari akun ini?')) {
-                    localStorage.removeItem('globalChatUsername');
-                    window.location.reload();
-                }
-            });
-            
-            attachButton.addEventListener('click', openFileAttachment);
-            document.addEventListener('visibilitychange', handleVisibilityChange);
-            window.addEventListener('focus', handleWindowFocus);
-            chatContent.addEventListener('scroll', handleChatScroll);
-            showStarredButton.addEventListener('click', showStarredModal);
-            closeStarredModal.addEventListener('click', closeStarredModalFunc);
-            window.addEventListener('resize', fixInputForKeyboard);
-            notificationClose.addEventListener('click', () => {
-                notification.classList.remove('show');
-            });
-            
-            messageInput.addEventListener('focus', () => {
-                fixInputForKeyboard();
-                scrollToBottom(true);
-            });
-            
-            messageInput.addEventListener('blur', restoreInputPosition);
-            
-            resizeObserver = new ResizeObserver(() => {
-                if (shouldAutoScroll) {
-                    scrollToBottom(true);
-                }
-            });
-            resizeObserver.observe(chatContent);
-            
-            cameraButton.addEventListener('click', openCamera);
-            voiceCallButton.addEventListener('click', () => startCall('voice'));
-            videoCallButton.addEventListener('click', () => startCall('video'));
-            answerCallButton.addEventListener('click', answerCall);
-            endCallButton.addEventListener('click', endCall);
-            toggleVideoButton.addEventListener('click', toggleVideo);
-            toggleAudioButton.addEventListener('click', toggleAudio);
-            switchCameraButton.addEventListener('click', switchCamera);
-            minimizeButton.addEventListener('click', minimizeCall);
-            maximizeButton.addEventListener('click', maximizeCall);
-            endCallButtonMinimized.addEventListener('click', endCall);
-            zoomInButton.addEventListener('click', () => adjustZoom(0.2));
-            zoomOutButton.addEventListener('click', () => adjustZoom(-0.2));
-            closeCameraPreview.addEventListener('click', closeCamera);
-            
-            themeToggleMenuItem.addEventListener('click', toggleTheme);
-            updateThemeIcon();
-            
-            setInterval(updateNetworkQuality, 5000);
-        }
-
-        function updateThemeIcon() {
-            const icon = themeToggleMenuItem.querySelector('.menu-icon i');
-            if (document.documentElement.getAttribute('data-theme') === 'dark') {
-                icon.className = 'fas fa-sun';
-                themeToggleMenuItem.querySelector('span:last-child').textContent = 'Mode Terang';
-            } else {
-                icon.className = 'fas fa-moon';
-                themeToggleMenuItem.querySelector('span:last-child').textContent = 'Mode Gelap';
-            }
-        }
-
-        function toggleTheme() {
-            if (document.documentElement.getAttribute('data-theme') === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'gradient');
-            } else {
-                document.documentElement.setAttribute('data-theme', 'dark');
-            }
-            updateThemeIcon();
-            menuContainer.classList.remove('active');
-        }
-
-        function updateCharCounter() {
-            const maxLength = 200;
-            const currentLength = messageInput.value.length;
-            const remaining = maxLength - currentLength;
-            
-            charCounter.textContent = remaining;
-            
-            if (remaining <= 10) {
-                charCounter.className = 'char-counter error';
-            } else if (remaining <= 30) {
-                charCounter.className = 'char-counter warning';
-            } else {
-                charCounter.className = 'char-counter';
-            }
-        }
-
-        function showNotification(message) {
-            notificationMessage.textContent = message;
-            notification.classList.remove('hide');
-            notification.classList.add('show');
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-                notification.classList.add('hide');
-            }, 3000);
-        }
-
-        function shareLocation() {
-            if (!navigator.geolocation) {
-                alert("Browser Anda tidak mendukung fitur lokasi");
-                return;
-            }
-            
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const { latitude, longitude } = position.coords;
-                    const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
-                    
-                    const messagesRef = ref(database, 'messages');
-                    const newMessageRef = push(messagesRef);
-                    
-                    set(newMessageRef, {
-                        text: `Saya membagikan lokasi: ${mapsUrl}`,
-                        username: currentUser.username,
-                        userId: userId,
-                        timestamp: Date.now(),
-                        color: currentUser.color,
-                        read: false,
-                        location: { lat: latitude, lng: longitude }
-                    });
-                    
-                    scrollToBottom(true);
-                },
-                (error) => {
-                    console.error("Error getting location", error);
-                    alert("Gagal mengambil lokasi: " + error.message);
-                }
-            );
-        }
-
-        function fixInputForKeyboard() {
-            if (window.innerWidth <= 768 && document.activeElement === messageInput) {
-                setTimeout(() => {
-                    chatInputContainer.scrollIntoView({behavior: "smooth", block: "end"});
-                    scrollToBottom(true);
-                }, 200);
-            }
-        }
-
-        function restoreInputPosition() {
-            window.scrollTo({top: 0, behavior: "smooth"});
-        }
-
-        function startChatting() {
-            const username = usernameInput.value.trim();
-            if (!username) {
-                alert('Mohon isi dengan benar');
-                return;
-            }
-            
-            userId = generateUserId();
-            currentUser = {
-                id: userId,
-                username: username,
-                color: getRandomColor(),
-                online: true
-            };
-            
-            localStorage.setItem('globalChatUsername', username);
-            welcomeScreen.style.display = 'none';
-            sidebar.style.display = 'flex';
-            chatContainer.style.display = 'flex';
-            currentUsername.textContent = username;
-            userAvatar.textContent = '';
-            userAvatar.innerHTML = `<i class="fas fa-user"></i>`;
-            userAvatar.style.backgroundColor = currentUser.color;
-            
-            chatInputContainer.classList.remove('hidden');
-            updateCharCounter();
-            
-            setupFirebase();
-            setTimeout(() => { messageInput.focus(); }, 300);
-        }
-
-        function generateUserId() {
-            return 'user_' + Date.now() + Math.random().toString(36).substr(2, 6);
-        }
-
-        function getRandomColor() {
-            const colors = ['#25d366', '#128c7e', '#FF5722', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#00BCD4', '#009688', '#4CAF50', '#8BC34A', '#CDDC39', '#FFC107', '#FF9800'];
-            return colors[Math.floor(Math.random() * colors.length)];
-        }
-
-        function setupFirebase() {
-            const messagesRef = ref(database, 'messages');
-            const usersRef = ref(database, 'users');
-            const typingRef = ref(database, 'typing');
-            const userRef = ref(database, `users/${userId}`);
-            
-            messageListeners.forEach(off);
-            messageListeners = [];
-            
-            const initialMessagesQuery = query(messagesRef, limitToLast(50));
-            const messagesListener = onValue(initialMessagesQuery, (snapshot) => {
-                const messages = snapshot.val();
-                renderMessages(messages);
-                if (firstLoad) {
-                    scrollToBottom(true);
-                    firstLoad = false;
-                }
-            });
-            messageListeners.push(messagesListener);
-            
-            set(userRef, {
-                username: currentUser.username,
-                online: true,
-                lastActive: serverTimestamp(),
-                color: currentUser.color
-            });
-            
-            onDisconnect(userRef).update({
-                online: false,
-                lastActive: serverTimestamp()
-            });
-            
-            const usersListener = onValue(usersRef, (snapshot) => {
-                const users = snapshot.val() || {};
-                onlineUsers = users;
-                let onlineCount = Object.values(users).filter(user => user.online).length;
-                updateOnlineUsersCount(onlineCount);
-            });
-            messageListeners.push(usersListener);
-            
-            const typingListener = onValue(typingRef, (snapshot) => {
-                const typingData = snapshot.val() || {};
-                usersTyping = typingData;
-                const otherUsersTyping = Object.entries(typingData)
-                    .filter(([id, data]) => id !== userId && data.isTyping)
-                    .map(([id, data]) => {
-                        const user = onlineUsers[id] || { username: 'Unknown' };
-                        return user.username;
-                    });
-                
-                if (otherUsersTyping.length > 0) {
-                    const names = otherUsersTyping.slice(0, 2).join(', ');
-                    const moreCount = otherUsersTyping.length > 2 ? ` and ${otherUsersTyping.length - 2} more` : '';
-                    typingText.textContent = `${names}${moreCount} typing`;
-                    typingIndicator.classList.add('active');
-                } else {
-                    typingIndicator.classList.remove('active');
-                }
-            });
-            messageListeners.push(typingListener);
-            
-            markMessagesAsRead();
-        }
-
-        function updateOnlineUsersCount(count) {
-            onlineUsersCount.textContent = `${count} online`;
-            userStatus.textContent = `${count} online`;
-        }
-
-        function renderMessages(messages) {
-            if (!messages) return;
-            
-            const wasNearBottom = isNearBottom();
-            
-            if (firstLoad) {
-                chatContent.innerHTML = '<div class="day-divider">Hari Ini</div>';
-            }
-            
-            starredMessages = [];
-            
-            let sorted = Object.entries(messages).sort(([aId, a], [bId, b]) => (a.timestamp||0)-(b.timestamp||0));
-            sorted.forEach(([id, message]) => {
-                if (firstLoad || message.timestamp > lastMessageTimestamp) {
-                    displayMessage(message, id);
-                    if (message.starred) starredMessages.push({id, ...message});
-                    lastMessageId = id;
-                    lastMessageTimestamp = message.timestamp;
-                }
-            });
-            
-            updateLastMessageTime(messages);
-            
-            if (wasNearBottom || shouldAutoScroll) {
-                scrollToBottom(true);
-            }
-        }
-
-        function isNearBottom() {
-            const threshold = 100;
-            return chatContent.scrollHeight - (chatContent.scrollTop + chatContent.clientHeight) < threshold;
-        }
-
-        function displayMessage(message, id) {
-            const isCurrentUser = message.userId === userId;
-            const messageElement = document.createElement('div');
-            messageElement.className = `message ${isCurrentUser ? 'sent' : 'received'}`;
-            messageElement.dataset.messageId = id;
-            messageElement.dataset.timestamp = message.timestamp || Date.now();
-            
-            if (selectedMessages.includes(id)) messageElement.classList.add('selected');
-            if (message.starred) messageElement.classList.add('starred');
-            
-            let replyPreview = '';
-            if (message.replyTo) {
-                replyPreview = `<div class="reply-preview" onclick="window.scrollToReply('${message.replyTo.messageId}')"><b>${escapeHTML(message.replyTo.username)}</b>: ${escapeHTML(message.replyTo.text).slice(0, 60)}</div>`;
-            }
-            
-            let mediaContent = '';
-            if (message.media && message.mediaType) {
-                if (message.mediaType.startsWith("image/")) {
-                    mediaContent = `<img src="${message.media}" alt="image" style="max-width:160px;max-height:160px;border-radius:8px;margin-bottom:6px;" />`;
-                } else {
-                    mediaContent = `<a href="${message.media}" target="_blank" style="color:#25d366;font-size:14px;margin-bottom:6px;display:inline-block;"><i class="fas fa-file"></i> File</a>`;
-                }
-            }
-            
-            let locationContent = '';
-            let displayText = escapeHTML(message.text);
-            
-            if (message.text) {
-                let url = null;
-                if (message.text.includes('Saya membagikan lokasi:')) {
-                    url = message.text.split('Saya membagikan lokasi:')[1].trim();
-                } else if (message.text.includes('Membagikan Lokasi:')) {
-                    url = message.text.split('Membagikan Lokasi:')[1].trim();
-                }
-
-                if (url) {
-                    locationContent = `
-                        <button class="slim-location-btn" onclick="window.open('${escapeHTML(url)}', '_blank')">
-                            <i class="fas fa-map-marker-alt"></i> Lihat Lokasi
-                        </button>
-                    `;
-                    displayText = '';
-                }
-            }
-            
-            let showMoreBtn = '';
-            if (displayText.length > 100) {
-                const shortText = displayText.substring(0, 100);
-                displayText = `
-                    <span class="message-text" data-full="${displayText}">${shortText}</span>
-                    <br><span class="show-more-btn" onclick="window.toggleMessageExpand(this)">Baca selengkapnya...</span></br>
-                `;
-            } else {
-                displayText = displayText ? `<span class="message-text">${displayText}</span>` : '';
-            }
-            
-            const time = formatTime(message.timestamp);
-            const statusIcon = isCurrentUser ? getStatusIcon(message.read) : '';
-            
-            messageElement.innerHTML = `
-                <div class="message-header">
-                    <button class="reply-btn" title="Reply"><i class="fas fa-reply"></i></button>
-                    <button class="star-btn" title="Star">${message.starred ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>'}</button>
-                </div>
-                
-                ${replyPreview}
-                ${mediaContent}
-                ${displayText ? `<div>${displayText}</div>` : ''}
-                ${locationContent}
-                <div class="message-info">
-                    ${!isCurrentUser ? `<span><i class="fas fa-user"></i> ${escapeHTML(message.username)}</span>` : ''}
-                    <span class="message-time"><i class="fas fa-clock"></i> ${time}</span>
-                    ${statusIcon}
-                </div>
-            `;
-            
-            messageElement.querySelector('.reply-btn').addEventListener('click', (e) => {
-                e.stopPropagation();
-                startReplyToMessage(message, id);
-            });
-            
-            messageElement.querySelector('.star-btn').addEventListener('click', (e) => {
-                e.stopPropagation();
-                starMessage(id, !message.starred);
-            });
-            
-            messageElement.addEventListener('click', () => {
-                if (selectedMessages.includes(id)) {
-                    selectedMessages = selectedMessages.filter(x => x !== id);
-                } else {
-                    selectedMessages.push(id);
-                }
-            });
-            
-            chatContent.appendChild(messageElement);
-        }
+        const realStats = await getRealNetworkStats();
+        if (!realStats) return;
         
-        window.toggleMessageExpand = function(btn) {
-            const messageElement = btn.closest('.message');
-            const messageTextSpan = messageElement.querySelector('.message-text');
-            const fullText = messageTextSpan.dataset.full;
-            
-            if (btn.textContent === 'Baca selengkapnya') {
-                messageTextSpan.textContent = fullText;
-                btn.textContent = 'Lihat lebih sedikit';
-            } else {
-                messageTextSpan.textContent = fullText.substring(0, 100) + '...';
-                btn.textContent = 'Baca selengkapnya';
-            }
-        };
+        const { quality, level } = realStats;
+        let status, className, icon;
         
-        function startReplyToMessage(message, id) {
-            replyToMessage = { messageId: id, username: message.username, text: message.text };
-            renderReplyBar();
-            messageInput.focus();
-        }
-        
-        function renderReplyBar() {
-            if (replyToMessage) {
-                replyingBar.innerHTML = `<span><b>${escapeHTML(replyToMessage.username)}</b>: ${escapeHTML(replyToMessage.text).slice(0,60)}</span>
-                <button class="cancel-reply" id="cancelReplyBtn" title="Cancel"><i class="fas fa-times"></i></button>`;
-                replyingBar.style.display = 'flex';
-                document.getElementById('cancelReplyBtn').onclick = cancelReply;
-            } else {
-                replyingBar.style.display = 'none';
-            }
-        }
-        
-        function cancelReply() {
-            replyToMessage = null;
-            renderReplyBar();
-        }
-        
-        function sendMessage() {
-            const messageText = messageInput.value.trim();
-            
-            if (messageText.length > 200) {
-                showNotification("Pesan tidak boleh lebih dari 200 karakter!");
-                return;
-            }
-            
-            if (!messageText && !mediaFile) return;
-            
-            sendButton.innerHTML = '<div class="spinner"></div>';
-            sendButton.disabled = true;
-            
-            const messagesRef = ref(database, 'messages');
-            const newMessageRef = push(messagesRef);
-            
-            let data = {
-                text: messageText,
-                username: currentUser.username,
-                userId: userId,
-                timestamp: Date.now(),
-                color: currentUser.color,
-                read: false
-            };
-            
-            if (replyToMessage) data.replyTo = replyToMessage;
-            
-            if (mediaFile && mediaUrl) {
-                data.media = mediaUrl;
-                data.mediaType = mediaFile.type;
-            }
-            set(newMessageRef, data);
-            setTimeout(() => {
-                messageInput.value = '';
-                isTyping = false;
-                updateTypingStatusInFirebase();
-                updateSendButtonState();
-                resetTextareaHeight();
-                cancelReply();
-                clearMediaPreview();
-                shouldAutoScroll = true;
-                scrollToBottom(true);
-                updateCharCounter();
-                sendButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
-                sendButton.disabled = false;
-            }, 500);
-        }
-        function starMessage(id, starred) {
-            const msgRef = ref(database, 'messages/' + id + '/starred');
-            set(msgRef, starred);
-        }
-        window.scrollToReply = function(messageId) {
-            const el = chatContent.querySelector(`[data-message-id='${messageId}']`);
-            if (el) {
-                el.scrollIntoView({behavior:'smooth', block:'center'});
-                el.style.background = "rgba(37,211,102,0.13)";
-                setTimeout(()=>{el.style.background="";}, 900);
-            }
-        }
-        function escapeHTML(str) {
-            return (str+"").replace(/[<>&"]/g,function(c){
-                return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];
-            });
-        }
-        function formatTime(timestamp) {
-            if (!timestamp) return 'Baru';
-            const date = new Date(timestamp);
-            if (isNaN(date.getTime())) return 'Baru saja';
-            const now = new Date();
-            const diffInMinutes = Math.floor((now - date) / (1000 * 60));
-            if (diffInMinutes < 1) return 'Baru saja';
-            if (diffInMinutes < 60) return `${diffInMinutes} Min`;
-            if (diffInMinutes < 24 * 60) return `${Math.floor(diffInMinutes / 60)} Jam`;
-            return date.toLocaleDateString('id-ID', { month: 'short', day: 'numeric' });
-        }
-        function getStatusIcon(read) {
-            if (read) {
-                return '<span class="message-status read"><i class="fas fa-check-double"></i></span>';
-            } else {
-                return '<span class="message-status"><i class="fas fa-check-double"></i></span>';
-            }
-        }
-        function updateLastMessageTime(messages) {
-            if (!messages) return;
-            let lastMessage = null;
-            Object.values(messages).forEach((msg) => {
-                if (!lastMessage || (msg.timestamp || 0) > (lastMessage.timestamp || 0)) lastMessage = msg;
-            });
-            if (!lastMessage) return;
-            lastMessageTime.textContent = formatTime(lastMessage.timestamp);
-            const chatPreview = document.querySelector('.chat-item.active .chat-preview');
-            if (chatPreview && lastMessage.text) {
-                const previewText = lastMessage.text.length > 30 
-                    ? lastMessage.text.substring(0, 30) + '...' 
-                    : lastMessage.text;
-                chatPreview.textContent = previewText;
-            }
-        }
-        function updateTypingStatus() {
-            if (!currentUser) return;
-            const now = Date.now();
-            const typingTimeout = 2000;
-            if (messageInput.value.length > 0) {
-                isTyping = true;
-                lastTypingTime = now;
-                updateTypingStatusInFirebase();
-            } else {
-                isTyping = false;
-                updateTypingStatusInFirebase();
-            }
-            setTimeout(() => {
-                if (now - lastTypingTime >= typingTimeout && isTyping) {
-                    isTyping = false;
-                    updateTypingStatusInFirebase();
-                }
-            }, typingTimeout);
-        }
-        function updateTypingStatusInFirebase() {
-            if (!currentUser) return;
-            const typingRef = ref(database, `typing/${userId}`);
-            if (isTyping) {
-                set(typingRef, {
-                    isTyping: true,
-                    username: currentUser.username,
-                    timestamp: serverTimestamp()
-                });
-            } else {
-                set(typingRef, {
-                    isTyping: false,
-                    username: currentUser.username,
-                    timestamp: serverTimestamp()
-                });
-            }
-        }
-        function markMessagesAsRead() {
-            if (!lastMessageId) return;
-            const messagesRef = ref(database, 'messages');
-            get(messagesRef).then((snapshot) => {
-                const messages = snapshot.val();
-                if (!messages) return;
-                const updates = {};
-                Object.entries(messages).forEach(([id, message]) => {
-                    if (message.userId !== userId && !message.read) {
-                        updates[`${id}/read`] = true;
-                    }
-                });
-                if (Object.keys(updates).length > 0) {
-                    update(messagesRef, updates);
-                }
-            });
-        }
-        function handleVisibilityChange() {
-            if (document.visibilityState === 'visible') {
-                document.title = 'DF MODS';
-                markMessagesAsRead();
-            }
-        }
-        function handleWindowFocus() {
-            markMessagesAsRead();
-        }
-        function autoResizeTextarea() {
-            messageInput.style.height = 'auto';
-            messageInput.style.height = (messageInput.scrollHeight) + 'px';
-        }
-        function resetTextareaHeight() {
-            messageInput.style.height = 'auto';
-        }
-        function updateSendButtonState() {
-            sendButton.disabled = messageInput.value.trim() === '' && !mediaFile;
-        }
-        function scrollToBottom(force = false) {
-            if (force || shouldAutoScroll) {
-                setTimeout(() => {
-                    chatContent.scrollTo({
-                        top: chatContent.scrollHeight,
-                        behavior: 'smooth'
-                    });
-                }, 100);
-            }
-        }
-        function handleChatScroll() {
-            const threshold = 100;
-            const position = chatContent.scrollTop + chatContent.clientHeight;
-            const isNearBottom = position > chatContent.scrollHeight - threshold;
-            shouldAutoScroll = isNearBottom;
-            if (!isNearBottom && chatContent.scrollTop < lastScrollPosition) {
-                shouldAutoScroll = false;
-            }
-            lastScrollPosition = chatContent.scrollTop;
-        }
-        function openFileAttachment() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = "image/*,.pdf,.doc,.docx,.ppt,.pptx,.zip,.rar,.txt";
-            input.onchange = function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                if (file.type.startsWith("video/") || file.type.startsWith("audio/")) {
-                    alert("Video & Audio Dilarang!");
-                    return;
-                }
-                if (file.size > 5 * 1024 * 1024) {
-                    alert("Hanya Boleh 5 MB");
-                    return;
-                }
-                showMediaPreview(file);
-            };
-            input.click();
-        }
-        function showMediaPreview(file) {
-            mediaFile = file;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                mediaUrl = e.target.result;
-                let preview = '';
-                if (file.type.startsWith("image/")) {
-                    preview = `<img src="${mediaUrl}" style="max-width:80px;max-height:80px;border-radius:8px;" alt="preview"/>`;
-                } else {
-                    preview = `<span style="color:#25d366;font-size:14px;"><i class="fas fa-file"></i> ${file.name}</span>`;
-                }
-                preview += `<button class="remove-media" id="removeMediaBtn" title="Remove"><i class="fas fa-times"></i></button>`;
-                mediaPreview.innerHTML = preview;
-                mediaPreview.style.display = "flex";
-                const restrictionInfo = document.createElement('div');
-                restrictionInfo.className = 'restriction-info';
-                restrictionInfo.innerHTML = '<i class="fas fa-info-circle"></i> Video & Audio Dilarang!';
-                mediaPreview.appendChild(restrictionInfo);
-                document.getElementById("removeMediaBtn").onclick = clearMediaPreview;
-                updateSendButtonState();
-            };
-            reader.readAsDataURL(file);
-        }
-        function clearMediaPreview() {
-            mediaFile = null;
-            mediaUrl = null;
-            mediaPreview.innerHTML = "";
-            mediaPreview.style.display = "none";
-            updateSendButtonState();
-        }
-        function clearMyChat() {
-            const messagesRef = ref(database, 'messages');
-            get(messagesRef).then((snapshot) => {
-                const messages = snapshot.val();
-                if (!messages) return;
-                Object.entries(messages).forEach(([id, message]) => {
-                    if (message.userId === userId) {
-                        remove(ref(database, 'messages/' + id));
-                    }
-                });
-                alert('Berhasil Menghapus Pesan');
-            });
-        }
-        function showStarredModal() {
-            starredModal.style.display = '';
-            starredList.innerHTML = '';
-            if (!starredMessages.length) {
-                starredList.innerHTML = '<div style="color:#888;font-size:14px;"><i class="far fa-star"></i> Tidak memiliki pesan</div>';
-                return;
-            }
-            starredMessages.forEach(msg => {
-                let div = document.createElement('div');
-                div.style.marginBottom = "12px";
-                div.style.padding = "8px";
-                div.style.background = "#fffde7";
-                div.style.borderRadius = "7px";
-                div.innerHTML = `<b><i class="fas fa-user"></i> ${escapeHTML(msg.username)}</b><br>${escapeHTML(msg.text)}`;
-                starredList.appendChild(div);
-            });
-        }
-        function closeStarredModalFunc() {
-            starredModal.style.display = 'none';
-        }
-        function openCamera() {
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                showNotification("Browser tidak mendukung kamera");
-                return;
-            }
-            if (cameraActive) {
-                closeCamera();
-                return;
-            }
-            navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-                .then(stream => {
-                    cameraStream = stream;
-                    cameraPreviewVideo.srcObject = stream;
-                    cameraPreview.style.display = "block";
-                    cameraActive = true;
-                    cameraButton.innerHTML = '<i class="fas fa-camera-slash"></i>';
-                })
-                .catch(error => {
-                    console.error("Error accessing camera:", error);
-                    showNotification("Tidak dapat mengakses kamera: " + error.message);
-                });
-        }
-        function closeCamera() {
-            if (cameraStream) {
-                cameraStream.getTracks().forEach(track => track.stop());
-                cameraStream = null;
-            }
-            cameraPreview.style.display = "none";
-            cameraActive = false;
-            cameraButton.innerHTML = '<i class="fas fa-camera"></i>';
-        }
-        function startCall(type) {
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                showNotification("Browser tidak mendukung panggilan");
-                return;
-            }
-            callType = type;
-            callActive = true;
-            callModal.classList.add('active');
-            callTitle.textContent = type === 'video' ? 'Panggilan Video' : 'Panggilan Suara';
-            callStatus.textContent = 'Mempersiapkan...';
-            navigator.mediaDevices.enumerateDevices()
-                .then(devices => {
-                    videoDevices = devices.filter(device => device.kind === 'videoinput');
-                    return navigator.mediaDevices.getUserMedia({
-                        audio: true,
-                        video: videoDevices.length > 0 ? { deviceId: videoDevices[0].deviceId } : true
-                    });
-                })
-                .then(stream => {
-                    localStream = stream;
-                    if (type === 'video') {
-                        localVideo.srcObject = stream;
-                        localVideoPlaceholder.style.display = 'none';
-                    } else {
-                        localVideoPlaceholder.style.display = 'flex';
-                    }
-                    callStartTime = new Date();
-                    callTimerInterval = setInterval(updateCallTimer, 1000);
-                    callStatus.textContent = 'Memanggil...';
-                    setTimeout(() => {
-                        simulateCallAnswered();
-                    }, 5000);
-                })
-                .catch(error => {
-                    console.error("Error starting call:", error);
-                    callStatus.textContent = 'Gagal memulai: ' + error.message;
-                    endCall();
-                });
-        }
-        function simulateCallAnswered() {
-            callStatus.textContent = 'Terhubung';
-            answerCallButton.style.display = 'none';
-            remoteVideoPlaceholder.style.display = 'flex';
-        }
-        function answerCall() {
-            callStatus.textContent = 'Terhubung';
-            answerCallButton.style.display = 'none';
-        }
-        function endCall() {
-            if (callTimerInterval) {
-                clearInterval(callTimerInterval);
-                callTimerInterval = null;
-            }
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-                localStream = null;
-            }
-            if (remoteStream) {
-                remoteStream.getTracks().forEach(track => track.stop());
-                remoteStream = null;
-            }
-            callModal.classList.remove('active');
-            minimizedCall.style.display = 'none';
-            callActive = false;
-            callType = null;
-            callMinimized = false;
-            localVideo.srcObject = null;
-            remoteVideo.srcObject = null;
-            minimizedRemoteVideo.srcObject = null;
-            localVideoPlaceholder.style.display = 'flex';
-            remoteVideoPlaceholder.style.display = 'flex';
-            answerCallButton.style.display = 'block';
-            callTimer.textContent = '00:00';
-            currentZoom = 1;
-        }
-        function updateCallTimer() {
-            const now = new Date();
-            const diff = Math.floor((now - callStartTime) / 1000);
-            const minutes = Math.floor(diff / 60).toString().padStart(2, '0');
-            const seconds = (diff % 60).toString().padStart(2, '0');
-            callTimer.textContent = `${minutes}:${seconds}`;
-        }
-        function toggleVideo() {
-            if (!localStream) return;
-            const videoTrack = localStream.getVideoTracks()[0];
-            if (videoTrack) {
-                videoEnabled = !videoEnabled;
-                videoTrack.enabled = videoEnabled;
-                toggleVideoButton.innerHTML = videoEnabled ? '<i class="fas fa-video"></i>' : '<i class="fas fa-video-slash"></i>';
-                toggleVideoButton.style.backgroundColor = videoEnabled ? '#333' : '#e53935';
-            }
-        }
-        function toggleAudio() {
-            if (!localStream) return;
-            const audioTrack = localStream.getAudioTracks()[0];
-            if (audioTrack) {
-                audioEnabled = !audioEnabled;
-                audioTrack.enabled = audioEnabled;
-                toggleAudioButton.innerHTML = audioEnabled ? '<i class="fas fa-microphone"></i>' : '<i class="fas fa-microphone-slash"></i>';
-                toggleAudioButton.style.backgroundColor = audioEnabled ? '#333' : '#e53935';
-            }
-        }
-        function switchCamera() {
-            if (!localStream || videoDevices.length < 2) return;
-            currentDeviceIndex = (currentDeviceIndex + 1) % videoDevices.length;
-            const deviceId = videoDevices[currentDeviceIndex].deviceId;
-            navigator.mediaDevices.getUserMedia({
-                video: { deviceId: { exact: deviceId } },
-                audio: true
-            })
-            .then(stream => {
-                localStream.getTracks().forEach(track => track.stop());
-                localStream = stream;
-                localVideo.srcObject = stream;
-            })
-            .catch(error => {
-                console.error("Error switching camera:", error);
-            });
-        }
-        function minimizeCall() {
-            callModal.classList.remove('active');
-            minimizedCall.style.display = 'flex';
-            callMinimized = true;
-            if (remoteVideo.srcObject) {
-                minimizedRemoteVideo.srcObject = remoteVideo.srcObject;
-            }
-        }
-        function maximizeCall() {
-            minimizedCall.style.display = 'none';
-            callModal.classList.add('active');
-            callMinimized = false;
-            if (minimizedRemoteVideo.srcObject) {
-                remoteVideo.srcObject = minimizedRemoteVideo.srcObject;
-            }
-        }
-        function adjustZoom(delta) {
-            currentZoom = Math.max(1, Math.min(3, currentZoom + delta));
-            localVideo.style.transform = `scale(${currentZoom})`;
-            remoteVideo.style.transform = `scale(${currentZoom})`;
-        }
-        function updateNetworkQuality() {
-            if (!callActive) return;
-            const quality = Math.random();
-            let status, className;
-            if (quality > 0.7) {
+        switch(quality) {
+            case 'good':
                 status = 'Baik';
                 className = 'good';
-            } else if (quality > 0.4) {
+                icon = 'fas fa-signal';
+                break;
+            case 'average':
                 status = 'Sedang';
                 className = 'average';
-            } else {
+                icon = 'fas fa-signal';
+                break;
+            case 'poor':
                 status = 'Buruk';
                 className = 'poor';
-            }
-            networkIndicator.innerHTML = `<i class="fas fa-signal"></i> ${status}`;
-            networkIndicator.className = `network-indicator ${className}`;
+                icon = 'fas fa-signal';
+                break;
         }
-        initApp();
-    </script>
+        
+        const bars = '▮'.repeat(level) + '▯'.repeat(4-level);
+        networkIndicator.innerHTML = `<i class="${icon}"></i> ${status} ${bars}`;
+        networkIndicator.className = `network-indicator ${className}`;
+    }
+
+    function initApp() {
+        const savedUsername = localStorage.getItem('globalChatUsername');
+        if (savedUsername) {
+            usernameInput.value = savedUsername;
+        }
+        
+        startChattingBtn.addEventListener('click', startChatting);
+        sendButton.addEventListener('click', sendMessage);
+        locationButton.addEventListener('click', shareLocation);
+        
+        messageInput.addEventListener('input', () => {
+            updateSendButtonState();
+            updateTypingStatus();
+            autoResizeTextarea();
+            updateCharCounter();
+        });
+        
+        menuButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menuContainer.classList.toggle('active');
+        });
+        
+        document.addEventListener('click', () => {
+            menuContainer.classList.remove('active');
+        });
+        
+        clearChatButton.addEventListener('click', () => {
+            if (confirm('Apakah kamu ingin menghapus chat?')) {
+                clearMyChat();
+                menuContainer.classList.remove('active');
+            }
+        });
+        
+        logoutButton.addEventListener('click', () => {
+            if (confirm('Apakah kamu mau keluar dari akun ini?')) {
+                localStorage.removeItem('globalChatUsername');
+                window.location.reload();
+            }
+        });
+        
+        attachButton.addEventListener('click', openFileAttachment);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener('focus', handleWindowFocus);
+        chatContent.addEventListener('scroll', handleChatScroll);
+        showStarredButton.addEventListener('click', showStarredModal);
+        closeStarredModal.addEventListener('click', closeStarredModalFunc);
+        window.addEventListener('resize', fixInputForKeyboard);
+        notificationClose.addEventListener('click', () => {
+            notification.classList.remove('show');
+        });
+        
+        messageInput.addEventListener('focus', () => {
+            fixInputForKeyboard();
+            scrollToBottom(true);
+        });
+        
+        messageInput.addEventListener('blur', restoreInputPosition);
+        
+        resizeObserver = new ResizeObserver(() => {
+            if (shouldAutoScroll) {
+                scrollToBottom(true);
+            }
+        });
+        resizeObserver.observe(chatContent);
+        
+        cameraButton.addEventListener('click', openCamera);
+        voiceCallButton.addEventListener('click', () => startCall('voice'));
+        videoCallButton.addEventListener('click', () => startCall('video'));
+        answerCallButton.addEventListener('click', answerCall);
+        endCallButton.addEventListener('click', endCall);
+        toggleVideoButton.addEventListener('click', toggleVideo);
+        toggleAudioButton.addEventListener('click', toggleAudio);
+        switchCameraButton.addEventListener('click', switchCamera);
+        minimizeButton.addEventListener('click', minimizeCall);
+        maximizeButton.addEventListener('click', maximizeCall);
+        endCallButtonMinimized.addEventListener('click', endCall);
+        zoomInButton.addEventListener('click', () => adjustZoom(0.2));
+        zoomOutButton.addEventListener('click', () => adjustZoom(-0.2));
+        closeCameraPreview.addEventListener('click', closeCamera);
+        
+        themeToggleMenuItem.addEventListener('click', toggleTheme);
+        updateThemeIcon();
+        
+        setInterval(updateNetworkQuality, 3000);
+    }
+
+    function updateThemeIcon() {
+        const icon = themeToggleMenuItem.querySelector('.menu-icon i');
+        if (document.documentElement.getAttribute('data-theme') === 'dark') {
+            icon.className = 'fas fa-sun';
+            themeToggleMenuItem.querySelector('span:last-child').textContent = 'Mode Terang';
+        } else {
+            icon.className = 'fas fa-moon';
+            themeToggleMenuItem.querySelector('span:last-child').textContent = 'Mode Gelap';
+        }
+    }
+
+    function toggleTheme() {
+        if (document.documentElement.getAttribute('data-theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'gradient');
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+        updateThemeIcon();
+        menuContainer.classList.remove('active');
+    }
+
+    function updateCharCounter() {
+        const maxLength = 200;
+        const currentLength = messageInput.value.length;
+        const remaining = maxLength - currentLength;
+        
+        charCounter.textContent = remaining;
+        
+        if (remaining <= 10) {
+            charCounter.className = 'char-counter error';
+        } else if (remaining <= 30) {
+            charCounter.className = 'char-counter warning';
+        } else {
+            charCounter.className = 'char-counter';
+        }
+    }
+
+    function showNotification(message) {
+        notificationMessage.textContent = message;
+        notification.classList.remove('hide');
+        notification.classList.add('show');
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+            notification.classList.add('hide');
+        }, 3000);
+    }
+
+    function shareLocation() {
+        if (!navigator.geolocation) {
+            alert("Browser Anda tidak mendukung fitur lokasi");
+            return;
+        }
+        
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+                
+                const messagesRef = ref(database, 'messages');
+                const newMessageRef = push(messagesRef);
+                
+                set(newMessageRef, {
+                    text: `Saya membagikan lokasi: ${mapsUrl}`,
+                    username: currentUser.username,
+                    userId: userId,
+                    timestamp: Date.now(),
+                    color: currentUser.color,
+                    read: false,
+                    location: { lat: latitude, lng: longitude }
+                });
+                
+                scrollToBottom(true);
+            },
+            (error) => {
+                console.error("Error getting location", error);
+                alert("Gagal mengambil lokasi: " + error.message);
+            }
+        );
+    }
+
+    function fixInputForKeyboard() {
+        if (window.innerWidth <= 768 && document.activeElement === messageInput) {
+            setTimeout(() => {
+                chatInputContainer.scrollIntoView({behavior: "smooth", block: "end"});
+                scrollToBottom(true);
+            }, 200);
+        }
+    }
+
+    function restoreInputPosition() {
+        window.scrollTo({top: 0, behavior: "smooth"});
+    }
+
+    function startChatting() {
+        const username = usernameInput.value.trim();
+        if (!username) {
+            alert('Mohon isi dengan benar');
+            return;
+        }
+        
+        userId = generateUserId();
+        currentUser = {
+            id: userId,
+            username: username,
+            color: getRandomColor(),
+            online: true
+        };
+        
+        localStorage.setItem('globalChatUsername', username);
+        welcomeScreen.style.display = 'none';
+        sidebar.style.display = 'flex';
+        chatContainer.style.display = 'flex';
+        currentUsername.textContent = username;
+        userAvatar.textContent = '';
+        userAvatar.innerHTML = `<i class="fas fa-user"></i>`;
+        userAvatar.style.backgroundColor = currentUser.color;
+        
+        chatInputContainer.classList.remove('hidden');
+        updateCharCounter();
+        
+        setupFirebase();
+        setTimeout(() => { messageInput.focus(); }, 300);
+    }
+
+    function generateUserId() {
+        return 'user_' + Date.now() + Math.random().toString(36).substr(2, 6);
+    }
+
+    function getRandomColor() {
+        const colors = ['#25d366', '#128c7e', '#FF5722', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#00BCD4', '#009688', '#4CAF50', '#8BC34A', '#CDDC39', '#FFC107', '#FF9800'];
+        return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    function setupFirebase() {
+        const messagesRef = ref(database, 'messages');
+        const usersRef = ref(database, 'users');
+        const typingRef = ref(database, 'typing');
+        const userRef = ref(database, `users/${userId}`);
+        
+        messageListeners.forEach(off);
+        messageListeners = [];
+        
+        const initialMessagesQuery = query(messagesRef, limitToLast(50));
+        const messagesListener = onValue(initialMessagesQuery, (snapshot) => {
+            const messages = snapshot.val();
+            renderMessages(messages);
+            if (firstLoad) {
+                scrollToBottom(true);
+                firstLoad = false;
+            }
+        });
+        messageListeners.push(messagesListener);
+        
+        set(userRef, {
+            username: currentUser.username,
+            online: true,
+            lastActive: serverTimestamp(),
+            color: currentUser.color
+        });
+        
+        onDisconnect(userRef).update({
+            online: false,
+            lastActive: serverTimestamp()
+        });
+        
+        const usersListener = onValue(usersRef, (snapshot) => {
+            const users = snapshot.val() || {};
+            onlineUsers = users;
+            let onlineCount = Object.values(users).filter(user => user.online).length;
+            updateOnlineUsersCount(onlineCount);
+        });
+        messageListeners.push(usersListener);
+        
+        const typingListener = onValue(typingRef, (snapshot) => {
+            const typingData = snapshot.val() || {};
+            usersTyping = typingData;
+            const otherUsersTyping = Object.entries(typingData)
+                .filter(([id, data]) => id !== userId && data.isTyping)
+                .map(([id, data]) => {
+                    const user = onlineUsers[id] || { username: 'Unknown' };
+                    return user.username;
+                });
+            
+            if (otherUsersTyping.length > 0) {
+                const names = otherUsersTyping.slice(0, 2).join(', ');
+                const moreCount = otherUsersTyping.length > 2 ? ` and ${otherUsersTyping.length - 2} more` : '';
+                typingText.textContent = `${names}${moreCount} typing`;
+                typingIndicator.classList.add('active');
+            } else {
+                typingIndicator.classList.remove('active');
+            }
+        });
+        messageListeners.push(typingListener);
+        
+        const callRef = ref(database, 'calls/global');
+        const callListener = onValue(callRef, async (snapshot) => {
+            const data = snapshot.val();
+            if (!data) return;
+
+            if (data.offer && !peerConnection) {
+                await receiveCall(data);
+            } else if (data.answer && peerConnection) {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+            } else if (data.iceCandidate && peerConnection) {
+                await peerConnection.addIceCandidate(new RTCIceCandidate(data.iceCandidate));
+            }
+        });
+        messageListeners.push(callListener);
+        
+        markMessagesAsRead();
+    }
+
+    function updateOnlineUsersCount(count) {
+        onlineUsersCount.textContent = `${count} online`;
+        userStatus.textContent = `${count} online`;
+    }
+
+    function renderMessages(messages) {
+        if (!messages) return;
+        
+        const wasNearBottom = isNearBottom();
+        
+        if (firstLoad) {
+            chatContent.innerHTML = '<div class="day-divider">Hari Ini</div>';
+        }
+        
+        starredMessages = [];
+        
+        let sorted = Object.entries(messages).sort(([aId, a], [bId, b]) => (a.timestamp||0)-(b.timestamp||0));
+        sorted.forEach(([id, message]) => {
+            if (firstLoad || message.timestamp > lastMessageTimestamp) {
+                displayMessage(message, id);
+                if (message.starred) starredMessages.push({id, ...message});
+                lastMessageId = id;
+                lastMessageTimestamp = message.timestamp;
+            }
+        });
+        
+        updateLastMessageTime(messages);
+        
+        if (wasNearBottom || shouldAutoScroll) {
+            scrollToBottom(true);
+        }
+    }
+
+    function isNearBottom() {
+        const threshold = 100;
+        return chatContent.scrollHeight - (chatContent.scrollTop + chatContent.clientHeight) < threshold;
+    }
+
+    function displayMessage(message, id) {
+        const isCurrentUser = message.userId === userId;
+        const messageElement = document.createElement('div');
+        messageElement.className = `message ${isCurrentUser ? 'sent' : 'received'}`;
+        messageElement.dataset.messageId = id;
+        messageElement.dataset.timestamp = message.timestamp || Date.now();
+        
+        if (selectedMessages.includes(id)) messageElement.classList.add('selected');
+        if (message.starred) messageElement.classList.add('starred');
+        
+        let replyPreview = '';
+        if (message.replyTo) {
+            replyPreview = `<div class="reply-preview" onclick="window.scrollToReply('${message.replyTo.messageId}')"><b>${escapeHTML(message.replyTo.username)}</b>: ${escapeHTML(message.replyTo.text).slice(0, 60)}</div>`;
+        }
+        
+        let mediaContent = '';
+        if (message.media && message.mediaType) {
+            if (message.mediaType.startsWith("image/")) {
+                mediaContent = `<img src="${message.media}" alt="image" style="max-width:160px;max-height:160px;border-radius:8px;margin-bottom:6px;" />`;
+            } else {
+                mediaContent = `<a href="${message.media}" target="_blank" style="color:#25d366;font-size:14px;margin-bottom:6px;display:inline-block;"><i class="fas fa-file"></i> File</a>`;
+            }
+        }
+        
+        let locationContent = '';
+        let displayText = escapeHTML(message.text);
+        
+        if (message.text) {
+            let url = null;
+            if (message.text.includes('Saya membagikan lokasi:')) {
+                url = message.text.split('Saya membagikan lokasi:')[1].trim();
+            } else if (message.text.includes('Membagikan Lokasi:')) {
+                url = message.text.split('Membagikan Lokasi:')[1].trim();
+            }
+
+            if (url) {
+                locationContent = `
+                    <button class="slim-location-btn" onclick="window.open('${escapeHTML(url)}', '_blank')">
+                        <i class="fas fa-map-marker-alt"></i> Lihat Lokasi
+                    </button>
+                `;
+                displayText = '';
+            }
+        }
+        
+        let showMoreBtn = '';
+        if (displayText.length > 100) {
+            const shortText = displayText.substring(0, 100);
+            displayText = `
+                <span class="message-text" data-full="${displayText}">${shortText}</span>
+                <br><span class="show-more-btn" onclick="window.toggleMessageExpand(this)">Baca selengkapnya...</span></br>
+            `;
+        } else {
+            displayText = displayText ? `<span class="message-text">${displayText}</span>` : '';
+        }
+        
+        const time = formatTime(message.timestamp);
+        const statusIcon = isCurrentUser ? getStatusIcon(message.read) : '';
+        
+        messageElement.innerHTML = `
+            <div class="message-header">
+                <button class="reply-btn" title="Reply"><i class="fas fa-reply"></i></button>
+                <button class="star-btn" title="Star">${message.starred ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>'}</button>
+            </div>
+            
+            ${replyPreview}
+            ${mediaContent}
+            ${displayText ? `<div>${displayText}</div>` : ''}
+            ${locationContent}
+            <div class="message-info">
+                ${!isCurrentUser ? `<span><i class="fas fa-user"></i> ${escapeHTML(message.username)}</span>` : ''}
+                <span class="message-time"><i class="fas fa-clock"></i> ${time}</span>
+                ${statusIcon}
+            </div>
+        `;
+        
+        messageElement.querySelector('.reply-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            startReplyToMessage(message, id);
+        });
+        
+        messageElement.querySelector('.star-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            starMessage(id, !message.starred);
+        });
+        
+        messageElement.addEventListener('click', () => {
+            if (selectedMessages.includes(id)) {
+                selectedMessages = selectedMessages.filter(x => x !== id);
+            } else {
+                selectedMessages.push(id);
+            }
+        });
+        
+        chatContent.appendChild(messageElement);
+    }
+    
+    window.toggleMessageExpand = function(btn) {
+        const messageElement = btn.closest('.message');
+        const messageTextSpan = messageElement.querySelector('.message-text');
+        const fullText = messageTextSpan.dataset.full;
+        
+        if (btn.textContent === 'Baca selengkapnya') {
+            messageTextSpan.textContent = fullText;
+            btn.textContent = 'Lihat lebih sedikit';
+        } else {
+            messageTextSpan.textContent = fullText.substring(0, 100) + '...';
+            btn.textContent = 'Baca selengkapnya';
+        }
+    };
+    
+    function startReplyToMessage(message, id) {
+        replyToMessage = { messageId: id, username: message.username, text: message.text };
+        renderReplyBar();
+        messageInput.focus();
+    }
+    
+    function renderReplyBar() {
+        if (replyToMessage) {
+            replyingBar.innerHTML = `<span><b>${escapeHTML(replyToMessage.username)}</b>: ${escapeHTML(replyToMessage.text).slice(0,60)}</span>
+            <button class="cancel-reply" id="cancelReplyBtn" title="Cancel"><i class="fas fa-times"></i></button>`;
+            replyingBar.style.display = 'flex';
+            document.getElementById("cancelReplyBtn").onclick = cancelReply;
+        } else {
+            replyingBar.style.display = 'none';
+        }
+    }
+    
+    function cancelReply() {
+        replyToMessage = null;
+        renderReplyBar();
+    }
+    
+    function sendMessage() {
+        const messageText = messageInput.value.trim();
+        
+        if (messageText.length > 200) {
+            showNotification("Pesan tidak boleh lebih dari 200 karakter!");
+            return;
+        }
+        
+        if (!messageText && !mediaFile) return;
+        
+        sendButton.innerHTML = '<div class="spinner"></div>';
+        sendButton.disabled = true;
+        
+        const messagesRef = ref(database, 'messages');
+        const newMessageRef = push(messagesRef);
+        
+        let data = {
+            text: messageText,
+            username: currentUser.username,
+            userId: userId,
+            timestamp: Date.now(),
+            color: currentUser.color,
+            read: false
+        };
+        
+        if (replyToMessage) data.replyTo = replyToMessage;
+        
+        if (mediaFile && mediaUrl) {
+            data.media = mediaUrl;
+            data.mediaType = mediaFile.type;
+        }
+        set(newMessageRef, data);
+        setTimeout(() => {
+            messageInput.value = '';
+            isTyping = false;
+            updateTypingStatusInFirebase();
+            updateSendButtonState();
+            resetTextareaHeight();
+            cancelReply();
+            clearMediaPreview();
+            shouldAutoScroll = true;
+            scrollToBottom(true);
+            updateCharCounter();
+            sendButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
+            sendButton.disabled = false;
+        }, 500);
+    }
+    function starMessage(id, starred) {
+        const msgRef = ref(database, 'messages/' + id + '/starred');
+        set(msgRef, starred);
+    }
+    window.scrollToReply = function(messageId) {
+        const el = chatContent.querySelector(`[data-message-id='${messageId}']`);
+        if (el) {
+            el.scrollIntoView({behavior:'smooth', block:'center'});
+            el.style.background = "rgba(37,211,102,0.13)";
+            setTimeout(()=>{el.style.background="";}, 900);
+        }
+    }
+    function escapeHTML(str) {
+        return (str+"").replace(/[<>&"]/g,function(c){
+            return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];
+        });
+    }
+    function formatTime(timestamp) {
+        if (!timestamp) return 'Baru';
+        const date = new Date(timestamp);
+        if (isNaN(date.getTime())) return 'Baru saja';
+        const now = new Date();
+        const diffInMinutes = Math.floor((now - date) / (1000 * 60));
+        if (diffInMinutes < 1) return 'Baru saja';
+        if (diffInMinutes < 60) return `${diffInMinutes} Min`;
+        if (diffInMinutes < 24 * 60) return `${Math.floor(diffInMinutes / 60)} Jam`;
+        return date.toLocaleDateString('id-ID', { month: 'short', day: 'numeric' });
+    }
+    function getStatusIcon(read) {
+        if (read) {
+            return '<span class="message-status read"><i class="fas fa-check-double"></i></span>';
+        } else {
+            return '<span class="message-status"><i class="fas fa-check-double"></i></span>';
+        }
+    }
+    function updateLastMessageTime(messages) {
+        if (!messages) return;
+        let lastMessage = null;
+        Object.values(messages).forEach((msg) => {
+            if (!lastMessage || (msg.timestamp || 0) > (lastMessage.timestamp || 0)) lastMessage = msg;
+        });
+        if (!lastMessage) return;
+        lastMessageTime.textContent = formatTime(lastMessage.timestamp);
+        const chatPreview = document.querySelector('.chat-item.active .chat-preview');
+        if (chatPreview && lastMessage.text) {
+            const previewText = lastMessage.text.length > 30 
+                ? lastMessage.text.substring(0, 30) + '...' 
+                : lastMessage.text;
+            chatPreview.textContent = previewText;
+        }
+    }
+    function updateTypingStatus() {
+        if (!currentUser) return;
+        const now = Date.now();
+        const typingTimeout = 2000;
+        if (messageInput.value.length > 0) {
+            isTyping = true;
+            lastTypingTime = now;
+            updateTypingStatusInFirebase();
+        } else {
+            isTyping = false;
+            updateTypingStatusInFirebase();
+        }
+        setTimeout(() => {
+            if (now - lastTypingTime >= typingTimeout && isTyping) {
+                isTyping = false;
+                updateTypingStatusInFirebase();
+            }
+        }, typingTimeout);
+    }
+    function updateTypingStatusInFirebase() {
+        if (!currentUser) return;
+        const typingRef = ref(database, `typing/${userId}`);
+        if (isTyping) {
+            set(typingRef, {
+                isTyping: true,
+                username: currentUser.username,
+                timestamp: serverTimestamp()
+            });
+        } else {
+            set(typingRef, {
+                isTyping: false,
+                username: currentUser.username,
+                timestamp: serverTimestamp()
+            });
+        }
+    }
+    function markMessagesAsRead() {
+        if (!lastMessageId) return;
+        const messagesRef = ref(database, 'messages');
+        get(messagesRef).then((snapshot) => {
+            const messages = snapshot.val();
+            if (!messages) return;
+            const updates = {};
+            Object.entries(messages).forEach(([id, message]) => {
+                if (message.userId !== userId && !message.read) {
+                    updates[`${id}/read`] = true;
+                }
+            });
+            if (Object.keys(updates).length > 0) {
+                update(messagesRef, updates);
+            }
+        });
+    }
+    function handleVisibilityChange() {
+        if (document.visibilityState === 'visible') {
+            document.title = 'DF MODS';
+            markMessagesAsRead();
+        }
+    }
+    function handleWindowFocus() {
+        markMessagesAsRead();
+    }
+    function autoResizeTextarea() {
+        messageInput.style.height = 'auto';
+        messageInput.style.height = (messageInput.scrollHeight) + 'px';
+    }
+    function resetTextareaHeight() {
+        messageInput.style.height = 'auto';
+    }
+    function updateSendButtonState() {
+        sendButton.disabled = messageInput.value.trim() === '' && !mediaFile;
+    }
+    function scrollToBottom(force = false) {
+        if (force || shouldAutoScroll) {
+            setTimeout(() => {
+                chatContent.scrollTo({
+                    top: chatContent.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }, 100);
+        }
+    }
+    function handleChatScroll() {
+        const threshold = 100;
+        const position = chatContent.scrollTop + chatContent.clientHeight;
+        const isNearBottom = position > chatContent.scrollHeight - threshold;
+        shouldAutoScroll = isNearBottom;
+        if (!isNearBottom && chatContent.scrollTop < lastScrollPosition) {
+            shouldAutoScroll = false;
+        }
+        lastScrollPosition = chatContent.scrollTop;
+    }
+    function openFileAttachment() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = "image/*,.pdf,.doc,.docx,.ppt,.pptx,.zip,.rar,.txt";
+        input.onchange = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.type.startsWith("video/") || file.type.startsWith("audio/")) {
+                alert("Video & Audio Dilarang!");
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                alert("Hanya Boleh 5 MB");
+                return;
+            }
+            showMediaPreview(file);
+        };
+        input.click();
+    }
+    function showMediaPreview(file) {
+        mediaFile = file;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            mediaUrl = e.target.result;
+            let preview = '';
+            if (file.type.startsWith("image/")) {
+                preview = `<img src="${mediaUrl}" style="max-width:80px;max-height:80px;border-radius:8px;" alt="preview"/>`;
+            } else {
+                preview = `<span style="color:#25d366;font-size:14px;"><i class="fas fa-file"></i> ${file.name}</span>`;
+            }
+            preview += `<button class="remove-media" id="removeMediaBtn" title="Remove"><i class="fas fa-times"></i></button>`;
+            mediaPreview.innerHTML = preview;
+            mediaPreview.style.display = "flex";
+            const restrictionInfo = document.createElement('div');
+            restrictionInfo.className = 'restriction-info';
+            restrictionInfo.innerHTML = '<i class="fas fa-info-circle"></i> Video & Audio Dilarang!';
+            mediaPreview.appendChild(restrictionInfo);
+            document.getElementById("removeMediaBtn").onclick = clearMediaPreview;
+            updateSendButtonState();
+        };
+        reader.readAsDataURL(file);
+    }
+    function clearMediaPreview() {
+        mediaFile = null;
+        mediaUrl = null;
+        mediaPreview.innerHTML = "";
+        mediaPreview.style.display = "none";
+        updateSendButtonState();
+    }
+    function clearMyChat() {
+        const messagesRef = ref(database, 'messages');
+        get(messagesRef).then((snapshot) => {
+            const messages = snapshot.val();
+            if (!messages) return;
+            Object.entries(messages).forEach(([id, message]) => {
+                if (message.userId === userId) {
+                    remove(ref(database, 'messages/' + id));
+                }
+            });
+            alert('Berhasil Menghapus Pesan');
+        });
+    }
+    function showStarredModal() {
+        starredModal.style.display = '';
+        starredList.innerHTML = '';
+        if (!starredMessages.length) {
+            starredList.innerHTML = '<div style="color:#888;font-size:14px;"><i class="far fa-star"></i> Tidak memiliki pesan</div>';
+            return;
+        }
+        starredMessages.forEach(msg => {
+            let div = document.createElement('div');
+            div.style.marginBottom = "12px";
+            div.style.padding = "8px";
+            div.style.background = "#fffde7";
+            div.style.borderRadius = "7px";
+            div.innerHTML = `<b><i class="fas fa-user"></i> ${escapeHTML(msg.username)}</b><br>${escapeHTML(msg.text)}`;
+            starredList.appendChild(div);
+        });
+    }
+    function closeStarredModalFunc() {
+        starredModal.style.display = 'none';
+    }
+    function openCamera() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            showNotification("Browser tidak mendukung kamera");
+            return;
+        }
+        if (cameraActive) {
+            closeCamera();
+            return;
+        }
+        navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+            .then(stream => {
+                cameraStream = stream;
+                cameraPreviewVideo.srcObject = stream;
+                cameraPreview.style.display = "block";
+                cameraActive = true;
+                cameraButton.innerHTML = '<i class="fas fa-camera-slash"></i>';
+            })
+            .catch(error => {
+                console.error("Error accessing camera:", error);
+                showNotification("Tidak dapat mengakses kamera: " + error.message);
+            });
+    }
+    function closeCamera() {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+            cameraStream = null;
+        }
+        cameraPreview.style.display = "none";
+        cameraActive = false;
+        cameraButton.innerHTML = '<i class="fas fa-camera"></i>';
+    }
+    async function startCall(type) {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            showNotification("Browser tidak mendukung panggilan");
+            return;
+        }
+        callType = type;
+        callActive = true;
+        callModal.classList.add('active');
+        callTitle.textContent = type === 'video' ? 'Panggilan Video' : 'Panggilan Suara';
+        callStatus.textContent = 'Mempersiapkan...';
+        
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({
+                audio: true,
+                video: type === 'video'
+            });
+            
+            peerConnection = new RTCPeerConnection(servers);
+            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+            
+            peerConnection.ontrack = (event) => {
+                remoteStream = new MediaStream();
+                event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
+                remoteVideo.srcObject = remoteStream;
+                minimizedRemoteVideo.srcObject = remoteStream;
+                remoteVideoPlaceholder.style.display = 'none';
+            };
+            
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    push(ref(database, 'calls/global/iceCandidate'), event.candidate.toJSON());
+                }
+            };
+            
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+            
+            set(ref(database, 'calls/global'), {
+                offer: offer,
+                from: userId,
+                type: type,
+                timestamp: Date.now()
+            });
+            
+            callModal.classList.add('active');
+            localVideo.srcObject = localStream;
+            localVideoPlaceholder.style.display = 'none';
+            
+            callStartTime = new Date();
+            callTimerInterval = setInterval(updateCallTimer, 1000);
+            callStatus.textContent = 'Memanggil...';
+            
+        } catch (err) {
+            console.error("Gagal memulai panggilan:", err);
+            callStatus.textContent = 'Gagal memulai: ' + err.message;
+            endCall();
+        }
+    }
+    async function receiveCall(data) {
+        try {
+            peerConnection = new RTCPeerConnection(servers);
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    push(ref(database, 'calls/global/iceCandidate'), event.candidate.toJSON());
+                }
+            };
+            
+            peerConnection.ontrack = (event) => {
+                remoteStream = new MediaStream();
+                event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
+                remoteVideo.srcObject = remoteStream;
+                minimizedRemoteVideo.srcObject = remoteStream;
+                remoteVideoPlaceholder.style.display = 'none';
+            };
+            
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+            localStream = await navigator.mediaDevices.getUserMedia({
+                audio: true,
+                video: data.type === 'video'
+            });
+            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+            localVideo.srcObject = localStream;
+            
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+            
+            set(ref(database, 'calls/global/answer'), answer);
+            callModal.classList.add('active');
+            localVideoPlaceholder.style.display = 'none';
+            callStatus.textContent = 'Terhubung';
+            
+            callStartTime = new Date();
+            callTimerInterval = setInterval(updateCallTimer, 1000);
+            
+        } catch (err) {
+            console.error("Gagal menerima panggilan:", err);
+            endCall();
+        }
+    }
+    function answerCall() {
+        callStatus.textContent = 'Terhubung';
+        answerCallButton.style.display = 'none';
+    }
+    function endCall() {
+        if (peerConnection) {
+            peerConnection.close();
+            peerConnection = null;
+        }
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+            localStream = null;
+        }
+        if (remoteStream) {
+            remoteStream.getTracks().forEach(track => track.stop());
+            remoteStream = null;
+        }
+        remove(ref(database, 'calls/global'));
+        callModal.classList.remove('active');
+        minimizedCall.style.display = 'none';
+        callActive = false;
+        callType = null;
+        callMinimized = false;
+        localVideo.srcObject = null;
+        remoteVideo.srcObject = null;
+        minimizedRemoteVideo.srcObject = null;
+        localVideoPlaceholder.style.display = 'flex';
+        remoteVideoPlaceholder.style.display = 'flex';
+        answerCallButton.style.display = 'block';
+        callTimer.textContent = '00:00';
+        currentZoom = 1;
+        if (callTimerInterval) {
+            clearInterval(callTimerInterval);
+            callTimerInterval = null;
+        }
+    }
+    function updateCallTimer() {
+        const now = new Date();
+        const diff = Math.floor((now - callStartTime) / 1000);
+        const minutes = Math.floor(diff / 60).toString().padStart(2, '0');
+        const seconds = (diff % 60).toString().padStart(2, '0');
+        callTimer.textContent = `${minutes}:${seconds}`;
+    }
+    function toggleVideo() {
+        if (!localStream) return;
+        const videoTrack = localStream.getVideoTracks()[0];
+        if (videoTrack) {
+            videoEnabled = !videoEnabled;
+            videoTrack.enabled = videoEnabled;
+            toggleVideoButton.innerHTML = videoEnabled ? '<i class="fas fa-video"></i>' : '<i class="fas fa-video-slash"></i>';
+            toggleVideoButton.style.backgroundColor = videoEnabled ? '#333' : '#e53935';
+        }
+    }
+    function toggleAudio() {
+        if (!localStream) return;
+        const audioTrack = localStream.getAudioTracks()[0];
+        if (audioTrack) {
+            audioEnabled = !audioEnabled;
+            audioTrack.enabled = audioEnabled;
+            toggleAudioButton.innerHTML = audioEnabled ? '<i class="fas fa-microphone"></i>' : '<i class="fas fa-microphone-slash"></i>';
+            toggleAudioButton.style.backgroundColor = audioEnabled ? '#333' : '#e53935';
+        }
+    }
+    function switchCamera() {
+        if (!localStream || videoDevices.length < 2) return;
+        currentDeviceIndex = (currentDeviceIndex + 1) % videoDevices.length;
+        const deviceId = videoDevices[currentDeviceIndex].deviceId;
+        navigator.mediaDevices.getUserMedia({
+            video: { deviceId: { exact: deviceId } },
+            audio: true
+        })
+        .then(stream => {
+            localStream.getTracks().forEach(track => track.stop());
+            localStream = stream;
+            localVideo.srcObject = stream;
+        })
+        .catch(error => {
+            console.error("Error switching camera:", error);
+        });
+    }
+    function minimizeCall() {
+        callModal.classList.remove('active');
+        minimizedCall.style.display = 'flex';
+        callMinimized = true;
+        if (remoteVideo.srcObject) {
+            minimizedRemoteVideo.srcObject = remoteVideo.srcObject;
+        }
+    }
+    function maximizeCall() {
+        minimizedCall.style.display = 'none';
+        callModal.classList.add('active');
+        callMinimized = false;
+        if (minimizedRemoteVideo.srcObject) {
+            remoteVideo.srcObject = minimizedRemoteVideo.srcObject;
+        }
+    }
+    function adjustZoom(delta) {
+        currentZoom = Math.max(1, Math.min(3, currentZoom + delta));
+        localVideo.style.transform = `scale(${currentZoom})`;
+        remoteVideo.style.transform = `scale(${currentZoom})`;
+    }
+    initApp();
+</script>
 </body>
 </html>
